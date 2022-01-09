@@ -1,0 +1,134 @@
+from unittest.mock import patch
+
+import pytest
+
+from settings_holder import SettingsHolder
+
+
+def function():
+    """Function to test dot notation importing."""
+    return "foo"
+
+
+def test_settings_holder__defaults():
+    holder = SettingsHolder()
+
+    assert holder.user_settings == dict()
+    assert holder.defaults == dict()
+    assert holder.import_strings == set()
+    assert holder.removed_settings == set()
+
+
+def test_settings_holder__setting_cached():
+    holder = SettingsHolder(user_settings={"foo": "bar"}, defaults={"foo": "baz"})
+    assert holder._cached_attrs == set()
+
+    with patch("settings_holder.holder.SettingsHolder.__getattr__", side_effect=holder.__getattr__) as mock:
+        x = holder.foo
+
+    mock.assert_called_once()
+    assert holder._cached_attrs == {"foo"}
+
+    with patch("settings_holder.holder.SettingsHolder.__getattr__", side_effect=holder.__getattr__) as mock:
+        x = holder.foo
+
+    # __getattribute__ should find cached attribute
+    mock.assert_not_called()
+
+    assert holder._cached_attrs == {"foo"}
+
+    holder.reload()
+    assert holder._cached_attrs == set()
+    with patch("settings_holder.holder.SettingsHolder.__getattr__", side_effect=holder.__getattr__) as mock:
+        x = holder.foo
+
+    mock.assert_called_once()
+
+
+def test_settings_holder__setting_not_in_defaults():
+    holder = SettingsHolder(user_settings={"foo": "bar"}, defaults={"foo": "baz"})
+
+    assert holder.user_settings == {"foo": "bar"}
+    assert holder.defaults == {"foo": "baz"}
+    assert holder.import_strings == set()
+    assert holder.removed_settings == set()
+
+    with pytest.raises(AttributeError, match="Invalid Setting: 'error'"):
+        holder.error  # noqa
+
+
+def test_settings_holder__using_removed_setting():
+    with pytest.raises(RuntimeError, match="These settings are no longer used: {'fizz'}."):
+        SettingsHolder(
+            user_settings={"foo": "bar", "fizz": "buzz"},
+            defaults={"foo": "baz"},
+            removed_settings={"fizz"},
+        )
+
+
+def test_settings_holder__import_function():
+    holder = SettingsHolder(defaults={"foo": "tests.test_utils.function"}, import_strings={"foo"})
+    assert holder.foo == function
+
+
+def test_settings_holder__import_function__called_on_access():
+    holder = SettingsHolder(defaults={"foo": "tests.test_utils.function"}, import_strings={b"foo"})
+    assert isinstance(holder.foo, str)
+    assert holder.foo == "foo"
+
+
+def test_settings_holder__import_function__list():
+    holder = SettingsHolder(defaults={"foo": ["tests.test_utils.function"]}, import_strings={"foo"})
+    assert isinstance(holder.foo, list)
+    assert holder.foo[0] == function
+
+
+def test_settings_holder__import_function__list__called_on_access():
+    holder = SettingsHolder(defaults={"foo": ["tests.test_utils.function"]}, import_strings={b"foo"})
+    assert isinstance(holder.foo, list)
+    assert isinstance(holder.foo[0], str)
+    assert holder.foo[0] == "foo"
+
+
+def test_settings_holder__import_function__dict():
+    holder = SettingsHolder(defaults={"foo": {"bar": "tests.test_utils.function"}}, import_strings={"foo"})
+    assert isinstance(holder.foo, dict)
+    assert holder.foo["bar"] == function
+
+
+def test_settings_holder__import_function__dict__called_on_access():
+    holder = SettingsHolder(defaults={"foo": {"bar": "tests.test_utils.function"}}, import_strings={b"foo"})
+    assert isinstance(holder.foo, dict)
+    assert isinstance(holder.foo["bar"], str)
+    assert holder.foo["bar"] == "foo"
+
+
+def test_settings_holder__import_function__does_not_exist():
+    holder = SettingsHolder(defaults={"foo": "bar"}, import_strings={"foo"})
+    error = f"Could not import 'bar' for setting 'foo': bar doesn't look like a module path."
+    with pytest.raises(ImportError, match=error):
+        x = holder.foo
+
+
+def test_settings_holder__import_function__not_valid():
+    holder = SettingsHolder(defaults={"foo": 1}, import_strings={"foo"})
+    error = f"'foo' should be a dot import statement, or a sequence of them. Got '1'."
+    with pytest.raises(ValueError, match=error):
+        x = holder.foo
+
+
+def test_settings_holder__import_function__function_does_not_exist():
+    holder = SettingsHolder(defaults={"foo": "tests.test_utils.xxx"}, import_strings={"foo"})
+    error = (
+        f"Could not import 'tests.test_utils.xxx' for setting 'foo': "
+        f"Module 'tests.test_utils' does not define a 'xxx' attribute/class"
+    )
+    with pytest.raises(ImportError, match=error):
+        x = holder.foo
+
+
+def test_settings_holder__import_function__module_does_not_exist():
+    holder = SettingsHolder(defaults={"foo": "xxx.test_utils.function"}, import_strings={"foo"})
+    error = f"Could not import 'xxx.test_utils.function' for setting 'foo': ModuleNotFoundError: No module named 'xxx'."
+    with pytest.raises(ImportError, match=error):
+        x = holder.foo

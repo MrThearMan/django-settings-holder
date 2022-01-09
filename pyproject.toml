@@ -1,0 +1,129 @@
+[tool.poetry]
+name = "django-settings-holder"
+version = "0.0.1"
+description = "Object that allows settings to be accessed with attributes."
+authors = [
+    "Matti Lamppu <lamppu.matti.akseli@gmail.com>",
+]
+packages = [
+    { include = "settings_holder" },
+]
+license = "MIT"
+readme = "README.md"
+homepage = "https://github.com/MrThearMan/django-settings-holder"
+repository = "https://github.com/MrThearMan/django-settings-holder"
+keywords = [
+    "django",
+    "settings",
+    "holder",
+]
+include = [
+    "README.md",
+    "LICENSE",
+]
+classifiers = [
+    "Environment :: Web Environment",
+    "Framework :: Django",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Intended Audience :: Developers",
+    "Natural Language :: English",
+]
+exclude = [
+    "tests",
+]
+
+[tool.poetry.urls]
+"Bug Tracker" = "https://github.com/MrThearMan/django-settings-holder/issues"
+
+
+[tool.poetry.dependencies]
+python = ">=3.8,<4"
+
+[tool.poetry.dev-dependencies]
+pytest-cov = "^3.0.0"
+tomli = "1.2.3"
+pre-commit = "^2.16.0"
+tox-gh-actions = "^2.8.1"
+tox = "^3.24.5"
+coveralls = "^3.3.1"
+mkdocs = "^1.2.3"
+black = "^21.12b0"
+isort = "^5.10.1"
+flake8 = "^4.0.1"
+mypy = "^0.931"
+pylint = "^2.12.2"
+
+[tool.black]
+line-length = 120
+
+[tool.isort]
+profile = "black"
+line_length = 120
+skip_gitignore = "True"
+lines_after_imports = 2
+
+[tool.pylint.MASTER]
+ignore-paths = [
+    "tests/*",
+    "docs/*",
+    ".venv/*",
+    ".tox/*",
+]
+
+[tool.pylint.messages_control]
+disable = "C0330, C0326, C0114, C0115, C0116, R0903, R0913, R1721, W1203, E0401"
+
+[tool.pylint.format]
+max-line-length = "120"
+
+[tool.pylint.miscellaneous]
+notes = "FIXME,XXX,BUG"
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = "True"
+warn_unused_configs = "True"
+
+[tool.coverage.run]
+relative_files = true
+
+[tool.coverage.report]
+omit = [
+    "tests/*",
+    "docs/*",
+    ".venv/*",
+    ".tox/*",
+]
+exclude_lines = [
+    "if TYPE_CHECKING:",
+    "except ImportError:",
+]
+
+[tool.tox]
+legacy_tox_ini = """
+[tox]
+envlist = py{38, 39, 310}
+isolated_build = true
+
+[gh-actions]
+python =
+    3.8: py38
+    3.9: py39
+    3.10: py310
+
+[testenv]
+whitelist_externals =
+    poetry
+setenv =
+    PYTHONPATH = {toxinidir}
+deps =
+    pytest-cov
+commands =
+    coverage run -m pytest -vv -s --log-cli-level=INFO
+"""
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
