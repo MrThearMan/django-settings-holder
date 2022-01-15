@@ -1,6 +1,7 @@
 site_name: Django Settings Holder
 nav:
   - Home: index.md
+  - Setup: setup.md
 theme:
   name: readthedocs
   highlightjs: true
@@ -8,3 +9,11 @@ theme:
     - python
     - json
     - console
+
+
+markdown_extensions:
+  - pymdownx.superfences:
+
+
+extra_css:
+  - css/docs.css

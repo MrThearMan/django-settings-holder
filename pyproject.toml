@@ -54,6 +54,7 @@ isort = "^5.10.1"
 flake8 = "^4.0.1"
 mypy = "^0.931"
 pylint = "^2.12.2"
+pymdown-extensions = "^9.1"
 
 [tool.black]
 line-length = 120
