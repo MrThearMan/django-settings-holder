@@ -2,7 +2,7 @@ from unittest.mock import patch
 
 import pytest
 
-from settings_holder import SettingsHolder
+from settings_holder import SettingsHolder, reload_settings
 
 
 def function():
@@ -132,3 +132,25 @@ def test_settings_holder__import_function__module_does_not_exist():
     error = f"Could not import 'xxx.test_utils.function' for setting 'foo': ModuleNotFoundError: No module named 'xxx'."
     with pytest.raises(ImportError, match=error):
         x = holder.foo
+
+
+def test_reload_settings():
+    holder = SettingsHolder(defaults={"foo": "bar"})
+    reloader = reload_settings(setting_name="SETTING_NAME", setting_holder=holder)
+
+    assert holder.foo == "bar"
+
+    reloader(value={"foo": "fizzbuzz"}, setting="SETTING_NAME")
+
+    assert holder.foo == "fizzbuzz"
+
+
+def test_reload_settings__different_setting():
+    holder = SettingsHolder(defaults={"foo": "bar"})
+    reloader = reload_settings(setting_name="SETTING_NAME", setting_holder=holder)
+
+    assert holder.foo == "bar"
+
+    reloader(value={"foo": "fizzbuzz"}, setting="FOO")
+
+    assert holder.foo == "bar"

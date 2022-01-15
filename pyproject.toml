@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "django-settings-holder"
-version = "0.0.1"
+version = "0.0.2"
 description = "Object that allows settings to be accessed with attributes."
 authors = [
     "Matti Lamppu <lamppu.matti.akseli@gmail.com>",
@@ -45,7 +45,7 @@ python = ">=3.8,<4"
 pytest-cov = "^3.0.0"
 tomli = "1.2.3"
 pre-commit = "^2.16.0"
-tox-gh-actions = "^2.8.1"
+tox-gh-actions = "^2.9.1"
 tox = "^3.24.5"
 coveralls = "^3.3.1"
 mkdocs = "^1.2.3"
