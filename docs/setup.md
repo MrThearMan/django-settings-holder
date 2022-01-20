@@ -4,6 +4,7 @@ Define a settings file with `USER_SETTINGS`, `DEFAULTS`, `IMPORT_STRINGS`, and `
 Then define the SettingsHolder from these. Then, connect the holder to the `setting_changed`-signal.
 
 ```python
+# ./settings.py
 from typing import Optional, Dict, Any, Set, Union
 from django.conf import settings
 from django.test.signals import setting_changed
@@ -17,7 +18,7 @@ SETTING_NAME: str = "..."
 USER_SETTINGS: Optional[Dict[str, Any]] = getattr(settings, SETTING_NAME, None)
 
 # All the settings that the setting accepts, and their defaults
-DEFAULTS: Dict[str, Any] = dict()
+DEFAULTS: Dict[str, Any] = {"foo": "bar"}
 
 # If these settings contain strings, or list or dict containing
 # strings, they will be considered "dot import strings" to functions.
@@ -62,3 +63,9 @@ setting_changed.connect(reload_settings(SETTING_NAME, holder))
 Now when apps use your extension, they can simply define the setting with the name
 you defined as `SETTING_NAME`, and your extension will use these settings instead of
 your defined defaults.
+
+```python
+from .settings import holder
+
+assert holder.foo == "bar"
+```

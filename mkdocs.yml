@@ -10,10 +10,8 @@ theme:
     - json
     - console
 
-
 markdown_extensions:
   - pymdownx.superfences:
-
 
 extra_css:
   - css/docs.css
