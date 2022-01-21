@@ -4,7 +4,7 @@ Define a settings file with `USER_SETTINGS`, `DEFAULTS`, `IMPORT_STRINGS`, and `
 Then define the SettingsHolder from these. Then, connect the holder to the `setting_changed`-signal.
 
 ```python
-# ./settings.py
+# my-library/settings.py
 from typing import Optional, Dict, Any, Set, Union
 from django.conf import settings
 from django.test.signals import setting_changed
@@ -12,6 +12,7 @@ from settings_holder import SettingsHolder, reload_settings
 
 
 # Name of setting that the SettingsHolder will hold
+# Note that the name must be in ALL CAPS!
 SETTING_NAME: str = "..."
 
 # User defined settings from the project settings file
@@ -60,12 +61,25 @@ setting_changed.connect(reload_settings(SETTING_NAME, holder))
 > ```
 
 
-Now when apps use your extension, they can simply define the setting with the name
+Now when projects use your extension, they can simply define the setting with the name
 you defined as `SETTING_NAME`, and your extension will use these settings instead of
 your defined defaults.
 
 ```python
+# project/settings.py
+
+# User defined settings for your library
+SETTING_NAME = {
+    "foo": "baz",
+}
+
+```
+
+```python
+# my-library/utils.py
 from .settings import holder
 
-assert holder.foo == "bar"
+# The user setting is reflected in the holder.
+# It would be the default "bar" if not set by the user.
+assert holder.foo == "baz"
 ```

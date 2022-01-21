@@ -23,10 +23,17 @@ include = [
 ]
 classifiers = [
     "Environment :: Web Environment",
-    "Framework :: Django",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Framework :: Django",
+    "Framework :: Django :: 3.0",
+    "Framework :: Django :: 3.1",
+    "Framework :: Django :: 3.2",
+    "Framework :: Django :: 4.0",
     "Intended Audience :: Developers",
     "Natural Language :: English",
 ]
@@ -45,15 +52,15 @@ python = ">=3.8,<4"
 pytest-cov = "^3.0.0"
 tomli = "1.2.3"
 pre-commit = "^2.17.0"
-tox-gh-actions = "^2.9.1"
 tox = "^3.24.5"
+tox-gh-actions = "^2.9.1"
 coveralls = "^3.3.1"
-mkdocs = "^1.2.3"
 black = "^21.12b0"
 isort = "^5.10.1"
 flake8 = "^4.0.1"
-mypy = "^0.931"
 pylint = "^2.12.2"
+mypy = "^0.931"
+mkdocs = "^1.2.3"
 pymdown-extensions = "^9.1"
 
 [tool.black]
