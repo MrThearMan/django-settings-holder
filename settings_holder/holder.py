@@ -42,6 +42,10 @@ class SettingsHolder:
         if removed:
             raise RuntimeError(f"These settings are no longer used: {removed}.")
 
+        undefined = set(self.user_settings).difference(set(self.defaults))
+        if undefined:
+            raise RuntimeError(f"These settings are not defined (no defaults): {undefined}.")
+
     def __getattr__(self, attr: str) -> Any:
         if attr not in self.defaults:
             raise AttributeError(f"Invalid Setting: '{attr}'")

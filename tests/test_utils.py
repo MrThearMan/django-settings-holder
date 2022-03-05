@@ -1,3 +1,4 @@
+import re
 from unittest.mock import patch
 
 import pytest
@@ -58,11 +59,19 @@ def test_settings_holder__setting_not_in_defaults():
 
 
 def test_settings_holder__using_removed_setting():
-    with pytest.raises(RuntimeError, match="These settings are no longer used: {'fizz'}."):
+    with pytest.raises(RuntimeError, match=re.escape("These settings are no longer used: {'fizz'}.")):
         SettingsHolder(
             user_settings={"foo": "bar", "fizz": "buzz"},
             defaults={"foo": "baz"},
             removed_settings={"fizz"},
+        )
+
+
+def test_settings_holder__using_undefined_setting():
+    with pytest.raises(RuntimeError, match=re.escape("These settings are not defined (no defaults): {'fizz'}.")):
+        SettingsHolder(
+            user_settings={"foo": "bar", "fizz": "buzz"},
+            defaults={"foo": "baz"},
         )
 
 
