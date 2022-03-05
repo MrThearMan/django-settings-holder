@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "django-settings-holder"
-version = "0.0.2"
+version = "0.0.3"
 description = "Object that allows settings to be accessed with attributes."
 authors = [
     "Matti Lamppu <lamppu.matti.akseli@gmail.com>",
@@ -50,18 +50,19 @@ python = ">=3.8,<4"
 
 [tool.poetry.dev-dependencies]
 pytest-cov = "^3.0.0"
-tomli = "1.2.3"
+tomli = "^2.0.1"
 pre-commit = "^2.17.0"
 tox = "^3.24.5"
 tox-gh-actions = "^2.9.1"
 coveralls = "^3.3.1"
-black = "^21.12b0"
+black = "^22.1.0"
 isort = "^5.10.1"
 flake8 = "^4.0.1"
 pylint = "^2.12.2"
 mypy = "^0.931"
 mkdocs = "^1.2.3"
-pymdown-extensions = "^9.1"
+pymdown-extensions = "^9.2"
+django-stubs = "^1.9.0"
 
 [tool.black]
 line-length = 120
@@ -81,18 +82,31 @@ ignore-paths = [
 ]
 
 [tool.pylint.messages_control]
-disable = "C0330, C0326, C0114, C0115, C0116, R0903, R0913, R1721, W1203, E0401"
+disable = [
+    "bad-continuation",
+    "bad-whitespace",
+    "missing-module-docstring",
+    "missing-class-docstring",
+    "missing-function-docstring",
+]
 
 [tool.pylint.format]
 max-line-length = "120"
 
 [tool.pylint.miscellaneous]
-notes = "FIXME,XXX,BUG"
+notes = [
+    "BUG",
+    "REFACTOR",
+    "CHECK",
+]
 
 [tool.mypy]
 python_version = "3.10"
 warn_return_any = "True"
 warn_unused_configs = "True"
+plugins = [
+    "mypy_django_plugin.main",
+]
 
 [tool.coverage.run]
 relative_files = true
@@ -107,7 +121,11 @@ omit = [
 exclude_lines = [
     "if TYPE_CHECKING:",
     "except ImportError:",
+    "pragma: no cover",
 ]
+
+[tool.pytest.ini_options]
+addopts = "-vv -s --log-cli-level=INFO"
 
 [tool.tox]
 legacy_tox_ini = """
