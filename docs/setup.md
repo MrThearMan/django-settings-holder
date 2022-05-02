@@ -44,7 +44,10 @@ holder = SettingsHolder(
 
 # Connect the holder object to the 'setting_changed' signal
 # so that the settings inside the holder are updated in DEBUG mode.
-setting_changed.connect(reload_settings(SETTING_NAME, holder))
+# NOTE: Function needs to be saved to a variable first
+# so that the signal is connected correctly!
+reload_my_settings = reload_settings(SETTING_NAME, holder)
+setting_changed.connect(reload_my_settings)
 ```
 
 > Hint:
