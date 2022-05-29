@@ -3,7 +3,16 @@ from unittest.mock import patch
 
 import pytest
 
-from settings_holder import SettingsHolder, reload_settings
+from settings_holder import SettingsHolder, SettingsWrapper, reload_settings
+
+
+@pytest.fixture
+def settings_fixture():
+    wrapper = SettingsWrapper()
+    try:
+        yield wrapper
+    finally:
+        wrapper.finalize()
 
 
 def function():
@@ -163,3 +172,59 @@ def test_reload_settings__different_setting():
     reloader(value={"foo": "fizzbuzz"}, setting="FOO")
 
     assert holder.foo == "bar"
+
+
+def test_settings_wrapper__fixture(settings_fixture):
+    assert settings_fixture.TEST_SETTING == "foo"
+    settings_fixture.TEST_SETTING = "bar"
+    assert settings_fixture.TEST_SETTING == "bar"
+
+
+def test_settings_wrapper__nested():
+    wrapper1 = SettingsWrapper()
+
+    try:
+
+        assert wrapper1.TEST_SETTING == "foo"
+        wrapper1.TEST_SETTING = "bar"
+        assert wrapper1.TEST_SETTING == "bar"
+
+        wrapper2 = SettingsWrapper()
+
+        try:
+
+            assert wrapper2.TEST_SETTING == "bar"
+            wrapper2.TEST_SETTING = "baz"
+            assert wrapper2.TEST_SETTING == "baz"
+
+        finally:
+            wrapper2.finalize()
+
+        assert wrapper1.TEST_SETTING == "bar"
+
+    finally:
+        wrapper1.finalize()
+
+    assert wrapper1.TEST_SETTING == "foo"
+
+
+def test_settings_wrapper__delete():
+    wrapper = SettingsWrapper()
+
+    try:
+        assert wrapper.TEST_SETTING == "foo"
+        del wrapper.TEST_SETTING
+        assert not hasattr(wrapper, "TEST_SETTING")
+    finally:
+        wrapper.finalize()
+
+    assert wrapper.TEST_SETTING == "foo"
+
+
+def test_settings_wrapper__access_restore():
+    wrapper = SettingsWrapper()
+
+    try:
+        assert wrapper.__getattr__("_SettingsWrapper__to_restore") == []
+    finally:
+        wrapper.finalize()
