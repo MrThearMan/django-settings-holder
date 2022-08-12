@@ -6,7 +6,10 @@
 [![GitHub][licence-badge]][licence]
 [![GitHub Last Commit][repo-badge]][repo]
 [![GitHub Issues][issues-badge]][issues]
+[![Downloads][downloads-badge]][pypi]
+
 [![Python Version][version-badge]][pypi]
+[![PyPI - Django Version][django]][pypi]
 
 ```shell
 pip install django-settings-holder
@@ -28,15 +31,17 @@ the SettingsHolder.
 
 
 [coverage-badge]: https://coveralls.io/repos/github/MrThearMan/django-settings-holder/badge.svg?branch=main
-[status-badge]: https://img.shields.io/github/workflow/status/MrThearMan/django-settings-holder/Tests
+[status-badge]: https://img.shields.io/github/workflow/status/MrThearMan/django-settings-holder/Test
 [pypi-badge]: https://img.shields.io/pypi/v/django-settings-holder
 [licence-badge]: https://img.shields.io/github/license/MrThearMan/django-settings-holder
 [repo-badge]: https://img.shields.io/github/last-commit/MrThearMan/django-settings-holder
 [issues-badge]: https://img.shields.io/github/issues-raw/MrThearMan/django-settings-holder
 [version-badge]: https://img.shields.io/pypi/pyversions/django-settings-holder
+[django]: https://img.shields.io/pypi/djversions/django-settings-holder
+[downloads-badge]: https://img.shields.io/pypi/dm/django-settings-holder
 
 [coverage]: https://coveralls.io/github/MrThearMan/django-settings-holder?branch=main
-[status]: https://github.com/MrThearMan/django-settings-holder/actions/workflows/main.yml
+[status]: https://github.com/MrThearMan/django-settings-holder/actions/workflows/test.yml
 [pypi]: https://pypi.org/project/django-settings-holder
 [licence]: https://github.com/MrThearMan/django-settings-holder/blob/main/LICENSE
 [repo]: https://github.com/MrThearMan/django-settings-holder/commits/main
