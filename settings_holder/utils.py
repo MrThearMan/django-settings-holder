@@ -7,7 +7,10 @@ if TYPE_CHECKING:
     from .holder import SettingsHolder
 
 
-__all__ = ["reload_settings"]
+__all__ = [
+    "reload_settings",
+    "SettingsWrapper",
+]
 
 
 def reload_settings(setting_name: str, setting_holder: SettingsHolder) -> Callable[..., None]:
@@ -20,10 +23,10 @@ def reload_settings(setting_name: str, setting_holder: SettingsHolder) -> Callab
     """
 
     def wrapper(*args, **kwargs) -> None:  # pylint: disable=W0613
-        setting, value = kwargs["setting"], kwargs["value"]
+        setting = kwargs["setting"]
 
         if setting == setting_name:
-            setting_holder.reload(new_user_settings=value)
+            setting_holder.reload()
 
     return wrapper
 

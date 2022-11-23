@@ -1,6 +1,6 @@
 # Setup
 
-Define a settings file with `USER_SETTINGS`, `DEFAULTS`, `IMPORT_STRINGS`, and `REMOVED_SETTINGS`.
+Define a settings file with `DEFAULTS`, `IMPORT_STRINGS`, and `REMOVED_SETTINGS`.
 Then define the SettingsHolder from these. Then, connect the holder to the `setting_changed`-signal.
 
 ```python
@@ -15,9 +15,6 @@ from settings_holder import SettingsHolder, reload_settings
 # Note that the name must be in ALL CAPS!
 SETTING_NAME: str = "..."
 
-# User defined settings from the project settings file
-USER_SETTINGS: Optional[Dict[str, Any]] = getattr(settings, SETTING_NAME, None)
-
 # All the settings that the setting accepts, and their defaults
 DEFAULTS: Dict[str, Any] = {"foo": "bar"}
 
@@ -26,17 +23,17 @@ DEFAULTS: Dict[str, Any] = {"foo": "bar"}
 # The SettingsHolder will try to import these string to functions
 # when the corresponding attribute is accessed. If the name is a
 # byte string (b"..."), the imported function will be called
-# immidiately with no arguments, and the result returned
+# immediately with no arguments, and the result returned
 # instead of the imported function.
 IMPORT_STRINGS: Set[Union[bytes, str]] = set()
 
-# Settings that were once avilable but no longer are.
+# Settings that were once available but no longer are.
 # Used for better error messages.
 REMOVED_SETTINGS: Set[str] = set()
 
 # Construct the holder object
 holder = SettingsHolder(
-    user_settings=USER_SETTINGS,
+    setting_name=SETTING_NAME,
     defaults=DEFAULTS,
     import_strings=IMPORT_STRINGS,
     removed_settings=REMOVED_SETTINGS,

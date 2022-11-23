@@ -15,7 +15,7 @@ class SettingsHolder:
 
     def __init__(
         self,
-        user_settings: Optional[Dict[str, Any]] = None,
+        setting_name: str,
         defaults: Optional[Dict[str, Any]] = None,
         import_strings: Optional[Set[Union[str, bytes]]] = None,
         removed_settings: Optional[Set[str]] = None,
@@ -23,42 +23,39 @@ class SettingsHolder:
         """Object that allows settings to be accessed with attributes.
         Any setting with string import paths will be automatically resolved.
 
-        :param user_settings: Settings that the user has specified in the project settings -module
+        :param setting_name: Name of the settings that the user can use to change
+                             the defaults in their project settings -module
         :param defaults: Defaults for the settings.
         :param import_strings: List of settings that should be in string dot import notation.
-                               If name is in bytes, the imported function is called immidiately
+                               If name is in bytes, the imported function is called immediately
                                on setting attribute access, and the result of the function is
                                returned instead of the function.
         :param removed_settings: Settings that have been removed in the past.
         """
 
-        self.user_settings = user_settings or {}
+        self.setting_name = setting_name
         self.defaults = defaults or {}
         self.import_strings = import_strings or set()
         self.removed_settings = removed_settings or set()
         self._cached_attrs: Set[str] = set()
 
-        removed = set(self.user_settings).intersection(self.removed_settings)
-        if removed:
-            raise RuntimeError(f"These settings are no longer used: {removed}.")
-
-        undefined = set(self.user_settings).difference(set(self.defaults))
-        if undefined:
-            raise RuntimeError(f"These settings are not defined (no defaults): {undefined}.")
-
     def __getattr__(self, attr: str) -> Any:
+        from django.conf import settings
+
         if attr not in self.defaults:
-            raise AttributeError(f"Invalid Setting: '{attr}'")
+            if attr in self.removed_settings:
+                raise AttributeError(f"This setting has been removed: {attr!r}.")
+            raise AttributeError(f"Invalid Setting: {attr!r}.")
 
         try:
-            val = self.user_settings[attr]
+            val = getattr(settings, self.setting_name, {})[attr]
         except KeyError:
             val = self.defaults[attr]
 
         if attr in self.import_strings:
             val = self.perform_import(val, attr)
 
-        # Settings with bytes will call the imported function immidiately
+        # Settings with bytes will call the imported function immediately
         elif bytes(attr, encoding="utf-8") in self.import_strings:
             val = self.perform_import(val, attr)
             if isinstance(val, list):
@@ -114,8 +111,7 @@ class SettingsHolder:
                 f"{msg}: Module '{module_path}' does not define a '{class_name}' attribute/class"
             ) from error
 
-    def reload(self, new_user_settings: Optional[Dict[str, Any]] = None) -> None:
+    def reload(self) -> None:
         for attr in self._cached_attrs:
             delattr(self, attr)
         self._cached_attrs.clear()
-        self.user_settings = new_user_settings or {}

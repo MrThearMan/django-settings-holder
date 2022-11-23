@@ -20,28 +20,32 @@ def function():
     return "foo"
 
 
-def test_settings_holder__defaults():
-    holder = SettingsHolder()
+def test_settings_holder__defaults(settings):
+    holder = SettingsHolder(setting_name="MOCK_SETTING")
 
-    assert holder.user_settings == dict()
+    assert holder.setting_name == "MOCK_SETTING"
     assert holder.defaults == dict()
     assert holder.import_strings == set()
     assert holder.removed_settings == set()
 
 
-def test_settings_holder__setting_cached():
-    holder = SettingsHolder(user_settings={"foo": "bar"}, defaults={"foo": "baz"})
+def test_settings_holder__setting_cached(settings):
+    settings.MOCK_SETTING = {"foo": "bar"}
+
+    holder = SettingsHolder(setting_name="MOCK_SETTING", defaults={"foo": "baz"})
     assert holder._cached_attrs == set()
 
     with patch("settings_holder.holder.SettingsHolder.__getattr__", side_effect=holder.__getattr__) as mock:
         x = holder.foo
 
+    assert x == "bar"
     mock.assert_called_once()
     assert holder._cached_attrs == {"foo"}
 
     with patch("settings_holder.holder.SettingsHolder.__getattr__", side_effect=holder.__getattr__) as mock:
         x = holder.foo
 
+    assert x == "bar"
     # __getattribute__ should find cached attribute
     mock.assert_not_called()
 
@@ -52,13 +56,17 @@ def test_settings_holder__setting_cached():
     with patch("settings_holder.holder.SettingsHolder.__getattr__", side_effect=holder.__getattr__) as mock:
         x = holder.foo
 
+    assert x == "bar"
     mock.assert_called_once()
 
 
-def test_settings_holder__setting_not_in_defaults():
-    holder = SettingsHolder(user_settings={"foo": "bar"}, defaults={"foo": "baz"})
+def test_settings_holder__setting_not_in_defaults(settings):
+    settings.MOCK_SETTING = {"foo": "bar"}
+    holder = SettingsHolder(
+        setting_name="MOCK_SETTING",
+        defaults={"foo": "baz"},
+    )
 
-    assert holder.user_settings == {"foo": "bar"}
     assert holder.defaults == {"foo": "baz"}
     assert holder.import_strings == set()
     assert holder.removed_settings == set()
@@ -67,76 +75,126 @@ def test_settings_holder__setting_not_in_defaults():
         holder.error  # noqa
 
 
-def test_settings_holder__using_removed_setting():
-    with pytest.raises(RuntimeError, match=re.escape("These settings are no longer used: {'fizz'}.")):
-        SettingsHolder(
-            user_settings={"foo": "bar", "fizz": "buzz"},
-            defaults={"foo": "baz"},
-            removed_settings={"fizz"},
-        )
+def test_settings_holder__using_removed_setting(settings):
+    settings.MOCK_SETTING = {"foo": "bar"}
+    holder = SettingsHolder(
+        setting_name="MOCK_SETTING",
+        defaults={"foo": "baz"},
+        removed_settings={"fizz"},
+    )
+
+    with pytest.raises(AttributeError, match=re.escape("This setting has been removed: 'fizz'.")):
+        holder.fizz  # noqa
 
 
-def test_settings_holder__using_undefined_setting():
-    with pytest.raises(RuntimeError, match=re.escape("These settings are not defined (no defaults): {'fizz'}.")):
-        SettingsHolder(
-            user_settings={"foo": "bar", "fizz": "buzz"},
-            defaults={"foo": "baz"},
-        )
+def test_settings_holder__using_undefined_setting(settings):
+    settings.MOCK_SETTING = {"foo": "bar", "fizz": "buzz"}
+    holder = SettingsHolder(
+        setting_name="MOCK_SETTING",
+        defaults={"foo": "baz"},
+    )
+    with pytest.raises(AttributeError, match=re.escape("Invalid Setting: 'fizz'.")):
+        holder.fizz  # noqa
 
 
-def test_settings_holder__import_function():
-    holder = SettingsHolder(defaults={"foo": "tests.test_utils.function"}, import_strings={"foo"})
+def test_settings_holder__import_function(settings):
+    holder = SettingsHolder(
+        setting_name="MOCK_SETTING",
+        defaults={"foo": "tests.test_utils.function"},
+        import_strings={"foo"},
+    )
+
     assert holder.foo == function
 
 
-def test_settings_holder__import_function__called_on_access():
-    holder = SettingsHolder(defaults={"foo": "tests.test_utils.function"}, import_strings={b"foo"})
+def test_settings_holder__import_function__called_on_access(settings):
+    holder = SettingsHolder(
+        setting_name="MOCK_SETTING",
+        defaults={"foo": "tests.test_utils.function"},
+        import_strings={b"foo"},
+    )
+
     assert isinstance(holder.foo, str)
     assert holder.foo == "foo"
 
 
-def test_settings_holder__import_function__list():
-    holder = SettingsHolder(defaults={"foo": ["tests.test_utils.function"]}, import_strings={"foo"})
+def test_settings_holder__import_function__list(settings):
+    holder = SettingsHolder(
+        setting_name="MOCK_SETTING",
+        defaults={"foo": ["tests.test_utils.function"]},
+        import_strings={"foo"},
+    )
+
     assert isinstance(holder.foo, list)
     assert holder.foo[0] == function
 
 
-def test_settings_holder__import_function__list__called_on_access():
-    holder = SettingsHolder(defaults={"foo": ["tests.test_utils.function"]}, import_strings={b"foo"})
+def test_settings_holder__import_function__list__called_on_access(settings):
+    holder = SettingsHolder(
+        setting_name="MOCK_SETTING",
+        defaults={"foo": ["tests.test_utils.function"]},
+        import_strings={b"foo"},
+    )
+
     assert isinstance(holder.foo, list)
     assert isinstance(holder.foo[0], str)
     assert holder.foo[0] == "foo"
 
 
-def test_settings_holder__import_function__dict():
-    holder = SettingsHolder(defaults={"foo": {"bar": "tests.test_utils.function"}}, import_strings={"foo"})
+def test_settings_holder__import_function__dict(settings):
+    holder = SettingsHolder(
+        setting_name="MOCK_SETTING",
+        defaults={"foo": {"bar": "tests.test_utils.function"}},
+        import_strings={"foo"},
+    )
+
     assert isinstance(holder.foo, dict)
     assert holder.foo["bar"] == function
 
 
-def test_settings_holder__import_function__dict__called_on_access():
-    holder = SettingsHolder(defaults={"foo": {"bar": "tests.test_utils.function"}}, import_strings={b"foo"})
+def test_settings_holder__import_function__dict__called_on_access(settings):
+    holder = SettingsHolder(
+        setting_name="MOCK_SETTING",
+        defaults={"foo": {"bar": "tests.test_utils.function"}},
+        import_strings={b"foo"},
+    )
+
     assert isinstance(holder.foo, dict)
     assert isinstance(holder.foo["bar"], str)
     assert holder.foo["bar"] == "foo"
 
 
-def test_settings_holder__import_function__does_not_exist():
-    holder = SettingsHolder(defaults={"foo": "bar"}, import_strings={"foo"})
+def test_settings_holder__import_function__does_not_exist(settings):
+    holder = SettingsHolder(
+        setting_name="MOCK_SETTING",
+        defaults={"foo": "bar"},
+        import_strings={"foo"},
+    )
+
     error = f"Could not import 'bar' for setting 'foo': bar doesn't look like a module path."
     with pytest.raises(ImportError, match=error):
         x = holder.foo
 
 
-def test_settings_holder__import_function__not_valid():
-    holder = SettingsHolder(defaults={"foo": 1}, import_strings={"foo"})
+def test_settings_holder__import_function__not_valid(settings):
+    holder = SettingsHolder(
+        setting_name="MOCK_SETTING",
+        defaults={"foo": 1},
+        import_strings={"foo"},
+    )
+
     error = f"'foo' should be a dot import statement, or a sequence of them. Got '1'."
     with pytest.raises(ValueError, match=error):
         x = holder.foo
 
 
-def test_settings_holder__import_function__function_does_not_exist():
-    holder = SettingsHolder(defaults={"foo": "tests.test_utils.xxx"}, import_strings={"foo"})
+def test_settings_holder__import_function__function_does_not_exist(settings):
+    holder = SettingsHolder(
+        setting_name="MOCK_SETTING",
+        defaults={"foo": "tests.test_utils.xxx"},
+        import_strings={"foo"},
+    )
+
     error = (
         f"Could not import 'tests.test_utils.xxx' for setting 'foo': "
         f"Module 'tests.test_utils' does not define a 'xxx' attribute/class"
@@ -145,27 +203,42 @@ def test_settings_holder__import_function__function_does_not_exist():
         x = holder.foo
 
 
-def test_settings_holder__import_function__module_does_not_exist():
-    holder = SettingsHolder(defaults={"foo": "xxx.test_utils.function"}, import_strings={"foo"})
+def test_settings_holder__import_function__module_does_not_exist(settings):
+    holder = SettingsHolder(
+        setting_name="MOCK_SETTING",
+        defaults={"foo": "xxx.test_utils.function"},
+        import_strings={"foo"},
+    )
+
     error = f"Could not import 'xxx.test_utils.function' for setting 'foo': ModuleNotFoundError: No module named 'xxx'."
     with pytest.raises(ImportError, match=error):
         x = holder.foo
 
 
-def test_reload_settings():
-    holder = SettingsHolder(defaults={"foo": "bar"})
-    reloader = reload_settings(setting_name="SETTING_NAME", setting_holder=holder)
+def test_reload_settings(settings):
+    holder = SettingsHolder(
+        setting_name="MOCK_SETTING",
+        defaults={"foo": "bar"},
+    )
+    reloader = reload_settings(setting_name="MOCK_SETTING", setting_holder=holder)
 
     assert holder.foo == "bar"
+    settings.MOCK_SETTING = {"foo": "fizzbuzz"}
 
-    reloader(value={"foo": "fizzbuzz"}, setting="SETTING_NAME")
+    # Reload has not happened yet
+    assert holder.foo == "bar"
+
+    reloader(value={"foo": "fizzbuzz"}, setting="MOCK_SETTING")
 
     assert holder.foo == "fizzbuzz"
 
 
-def test_reload_settings__different_setting():
-    holder = SettingsHolder(defaults={"foo": "bar"})
-    reloader = reload_settings(setting_name="SETTING_NAME", setting_holder=holder)
+def test_reload_settings__different_setting(settings):
+    holder = SettingsHolder(
+        setting_name="MOCK_SETTING",
+        defaults={"foo": "bar"},
+    )
+    reloader = reload_settings(setting_name="MOCK_SETTING", setting_holder=holder)
 
     assert holder.foo == "bar"
 
