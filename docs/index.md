@@ -31,7 +31,7 @@ the SettingsHolder.
 
 
 [coverage-badge]: https://coveralls.io/repos/github/MrThearMan/django-settings-holder/badge.svg?branch=main
-[status-badge]: https://img.shields.io/github/workflow/status/MrThearMan/django-settings-holder/Test
+[status-badge]: https://img.shields.io/github/actions/workflow/status/MrThearMan/django-settings-holder/test.yml?branch=main
 [pypi-badge]: https://img.shields.io/pypi/v/django-settings-holder
 [licence-badge]: https://img.shields.io/github/license/MrThearMan/django-settings-holder
 [repo-badge]: https://img.shields.io/github/last-commit/MrThearMan/django-settings-holder
