@@ -257,7 +257,6 @@ def test_settings_wrapper__nested():
     wrapper1 = SettingsWrapper()
 
     try:
-
         assert wrapper1.TEST_SETTING == "foo"
         wrapper1.TEST_SETTING = "bar"
         assert wrapper1.TEST_SETTING == "bar"
@@ -265,7 +264,6 @@ def test_settings_wrapper__nested():
         wrapper2 = SettingsWrapper()
 
         try:
-
             assert wrapper2.TEST_SETTING == "bar"
             wrapper2.TEST_SETTING = "baz"
             assert wrapper2.TEST_SETTING == "baz"

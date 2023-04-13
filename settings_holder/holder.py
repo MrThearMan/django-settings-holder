@@ -2,7 +2,6 @@ from importlib import import_module
 from sys import modules
 from typing import Any, Callable, Dict, Mapping, Optional, Sequence, Set, Union
 
-
 __all__ = [
     "SettingsHolder",
 ]
