@@ -35,7 +35,8 @@ body:
         If you are not using the latest version, please try to also reproduce the bug
         on the latest version before opening the issue.
       options:
-        - "0.0.1"
+        - "0.1.0"
+        - "0.0.5"
     validations:
       required: true
   - type: dropdown
