@@ -21,6 +21,8 @@ pip install django-settings-holder
 
 **Source Code**: [https://github.com/MrThearMan/django-settings-holder/](https://github.com/MrThearMan/django-settings-holder/)
 
+**Contributing**: [https://github.com/MrThearMan/django-settings-holder/blob/main/CONTRIBUTING.md](https://github.com/MrThearMan/django-settings-holder/blob/main/CONTRIBUTING.md)
+
 ---
 
 This library provides utilities for Django extensions that want to define their own settings dictionaries.
