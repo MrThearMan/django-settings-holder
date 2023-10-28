@@ -8,7 +8,8 @@ __all__ = [
 
 
 class SettingsHolder:
-    """Object that allows settings to be accessed with attributes.
+    """
+    Object that allows settings to be accessed with attributes.
     Any setting with string import paths will be automatically resolved.
     """
 
@@ -18,8 +19,9 @@ class SettingsHolder:
         defaults: Optional[Dict[str, Any]] = None,
         import_strings: Optional[Set[Union[str, bytes]]] = None,
         removed_settings: Optional[Set[str]] = None,
-    ):
-        """Object that allows settings to be accessed with attributes.
+    ) -> None:
+        """
+        Object that allows settings to be accessed with attributes.
         Any setting with string import paths will be automatically resolved.
 
         :param setting_name: Name of the settings that the user can use to change
@@ -31,7 +33,6 @@ class SettingsHolder:
                                returned instead of the function.
         :param removed_settings: Settings that have been removed in the past.
         """
-
         self.setting_name = setting_name
         self.defaults = defaults or {}
         self.import_strings = import_strings or set()
@@ -43,8 +44,10 @@ class SettingsHolder:
 
         if attr not in self.defaults:
             if attr in self.removed_settings:
-                raise AttributeError(f"This setting has been removed: {attr!r}.")
-            raise AttributeError(f"Invalid Setting: {attr!r}.")
+                msg = f"This setting has been removed: {attr!r}."
+                raise AttributeError(msg)
+            msg = f"Invalid Setting: {attr!r}."
+            raise AttributeError(msg)
 
         try:
             val = getattr(settings, self.setting_name, {})[attr]
@@ -69,7 +72,7 @@ class SettingsHolder:
         setattr(self, attr, val)
         return val
 
-    def perform_import(self, val: str, setting: str) -> Any:  # type: ignore
+    def perform_import(self, val: str, setting: str) -> Any:
         """If the given setting is a string import notation, then perform the necessary import or imports."""
         if isinstance(val, str):
             return self.import_from_string(val, setting)
@@ -81,17 +84,18 @@ class SettingsHolder:
                 for key, value in val.items()
             }
 
-        raise ValueError(f"'{setting}' should be a dot import statement, or a sequence of them. Got '{val}'.")
+        msg = f"'{setting}' should be a dot import statement, or a sequence of them. Got '{val}'."
+        raise ValueError(msg)
 
     @staticmethod
     def import_from_string(val: str, setting: str) -> Callable[..., Any]:
         """Attempt to import a class from a string representation."""
-
         msg = f"Could not import '{val}' for setting '{setting}'"
         try:
             module_path, class_name = val.rsplit(".", 1)
         except ValueError as error:
-            raise ImportError(f"{msg}: {val} doesn't look like a module path.") from error
+            msg = f"{msg}: {val} doesn't look like a module path."
+            raise ImportError(msg) from error
 
         if module_path not in modules or (
             # Module is not fully initialized.
@@ -101,14 +105,14 @@ class SettingsHolder:
             try:
                 import_module(module_path)
             except ImportError as error:
-                raise ImportError(f"{msg}: {error.__class__.__name__}: {error}.") from error
+                msg = f"{msg}: {error.__class__.__name__}: {error}."
+                raise ImportError(msg) from error
 
         try:
             return getattr(modules[module_path], class_name)
         except AttributeError as error:
-            raise ImportError(
-                f"{msg}: Module '{module_path}' does not define a '{class_name}' attribute/class"
-            ) from error
+            msg = f"{msg}: Module '{module_path}' does not define a '{class_name}' attribute/class"
+            raise ImportError(msg) from error
 
     def reload(self) -> None:
         for attr in self._cached_attrs:

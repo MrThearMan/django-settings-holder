@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Callable
+from typing import TYPE_CHECKING, Any, Callable
 
 if TYPE_CHECKING:
     from .holder import SettingsHolder
@@ -13,7 +13,8 @@ __all__ = [
 
 
 def reload_settings(setting_name: str, setting_holder: SettingsHolder) -> Callable[..., None]:
-    """Prepare a setting holder to be connected to the 'setting_changed' signal.
+    """
+    Prepare a setting holder to be connected to the 'setting_changed' signal.
 
     :param setting_name: The holder will be reloaded when a setting with this name
                          is changed in the project's settings file.
@@ -21,7 +22,7 @@ def reload_settings(setting_name: str, setting_holder: SettingsHolder) -> Callab
     :return: Function to connect to the 'setting_changed' signal.
     """
 
-    def wrapper(*args, **kwargs) -> None:  # pylint: disable=W0613
+    def wrapper(*args: Any, **kwargs: Any) -> None:
         setting = kwargs["setting"]
 
         if setting == setting_name:
@@ -33,7 +34,7 @@ def reload_settings(setting_name: str, setting_holder: SettingsHolder) -> Callab
 class SettingsWrapper:
     """Object to enable changing settings during testing."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.__to_restore = []
 
     def __delattr__(self, attr: str) -> None:
@@ -47,7 +48,7 @@ class SettingsWrapper:
 
         self.__to_restore.append(override)
 
-    def __setattr__(self, attr: str, value) -> None:
+    def __setattr__(self, attr: str, value: Any) -> None:
         if attr == "_SettingsWrapper__to_restore":
             self.__dict__[attr] = value
             return
@@ -58,7 +59,7 @@ class SettingsWrapper:
         override.enable()
         self.__to_restore.append(override)
 
-    def __getattr__(self, attr: str):
+    def __getattr__(self, attr: str) -> Any:
         if attr == "_SettingsWrapper__to_restore":
             return self.__dict__[attr]
 
