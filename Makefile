@@ -1,4 +1,4 @@
-export DJANGO_SETTINGS_MODULE = tests.django.settings
+export DJANGO_SETTINGS_MODULE = tests.project.settings
 
 .PHONY: help
 .PHONY: dev
@@ -7,8 +7,7 @@ export DJANGO_SETTINGS_MODULE = tests.django.settings
 .PHONY: test
 .PHONY: tox
 .PHONY: hook
-.PHONY: pre-commit
-.PHONY: pre-commit-update
+.PHONY: lint
 .PHONY: mypy
 .PHONY: Makefile
 

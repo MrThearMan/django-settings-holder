@@ -4,10 +4,13 @@ from django.core.management.utils import get_random_secret_key
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-SECRET_KEY = get_random_secret_key()
+
 DEBUG = True
-ROOT_URLCONF = "tests.django.urls"
-WSGI_APPLICATION = "tests.django.wsgi.application"
+SECRET_KEY = get_random_secret_key()
+
+ROOT_URLCONF = "tests.project.urls"
+WSGI_APPLICATION = "tests.project.wsgi.application"
+
 ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
@@ -49,7 +52,7 @@ TEMPLATES = [
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "django" / "testdb",
+        "NAME": BASE_DIR / "project" / "testdb",
     }
 }
 
