@@ -13,7 +13,8 @@ __all__ = [
 
 
 def reload_settings(setting_name: str, setting_holder: SettingsHolder) -> Callable[..., None]:
-    """Prepare a setting holder to be connected to the 'setting_changed' signal.
+    """
+    Prepare a setting holder to be connected to the 'setting_changed' signal.
 
     :param setting_name: The holder will be reloaded when a setting with this name
                          is changed in the project's settings file.

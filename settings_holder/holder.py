@@ -8,7 +8,8 @@ __all__ = [
 
 
 class SettingsHolder:
-    """Object that allows settings to be accessed with attributes.
+    """
+    Object that allows settings to be accessed with attributes.
     Any setting with string import paths will be automatically resolved.
     """
 
@@ -19,7 +20,8 @@ class SettingsHolder:
         import_strings: Optional[Set[Union[str, bytes]]] = None,
         removed_settings: Optional[Set[str]] = None,
     ):
-        """Object that allows settings to be accessed with attributes.
+        """
+        Object that allows settings to be accessed with attributes.
         Any setting with string import paths will be automatically resolved.
 
         :param setting_name: Name of the settings that the user can use to change
@@ -31,7 +33,6 @@ class SettingsHolder:
                                returned instead of the function.
         :param removed_settings: Settings that have been removed in the past.
         """
-
         self.setting_name = setting_name
         self.defaults = defaults or {}
         self.import_strings = import_strings or set()
@@ -86,7 +87,6 @@ class SettingsHolder:
     @staticmethod
     def import_from_string(val: str, setting: str) -> Callable[..., Any]:
         """Attempt to import a class from a string representation."""
-
         msg = f"Could not import '{val}' for setting '{setting}'"
         try:
             module_path, class_name = val.rsplit(".", 1)
