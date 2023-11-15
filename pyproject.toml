@@ -50,7 +50,7 @@ exclude = [
 python = ">=3.8,<4"
 
 [tool.poetry.group.test.dependencies]
-Django = "4.2.6"
+Django = "4.2.7"
 pytest = "7.4.3"
 coverage = "7.3.2"
 pytest-django = "4.6.0"
