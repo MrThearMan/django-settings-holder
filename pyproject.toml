@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "django-settings-holder"
-version = "0.1.1"
+version = "0.1.2"
 description = "Object that allows settings to be accessed with attributes."
 authors = [
     "Matti Lamppu <lamppu.matti.akseli@gmail.com>",
@@ -48,7 +48,7 @@ exclude = [
 "Bug Tracker" = "https://github.com/MrThearMan/django-settings-holder/issues"
 
 [tool.poetry.plugins.pytest11]
-graphene_django_extensions = "settings_holder.fixtures"
+django_settings_holder = "settings_holder.fixtures"
 
 [tool.poetry.dependencies]
 python = ">=3.9,<4"
