@@ -1,3 +1,35 @@
+"""
+Here is a template for quick setup:
+
+------------------------------------------------------------------------------
+from typing import Any, NamedTuple
+
+from django.test.signals import setting_changed
+
+from settings_holder import SettingsHolder, reload_settings
+
+__all__ = ["my_settings"]
+
+
+SETTING_NAME: str = "..."
+
+
+class MySettings(NamedTuple):
+    ...
+
+
+DEFAULTS: dict[str, Any] = MySettings()._asdict()
+
+my_settings = SettingsHolder(
+    setting_name=SETTING_NAME,
+    defaults=DEFAULTS,
+)
+
+reload_my_settings = reload_settings(SETTING_NAME, my_settings)
+setting_changed.connect(reload_my_settings)
+------------------------------------------------------------------------------
+"""
+
 from importlib import import_module
 from sys import modules
 from typing import Any, Callable, Dict, Mapping, Optional, Sequence, Set, Union
@@ -13,12 +45,13 @@ class SettingsHolder:
     Any setting with string import paths will be automatically resolved.
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         setting_name: str,
         defaults: Optional[Dict[str, Any]] = None,
         import_strings: Optional[Set[Union[str, bytes]]] = None,
         removed_settings: Optional[Set[str]] = None,
+        validators: Optional[Dict[str, Callable[[Any], None]]] = None,
     ) -> None:
         """
         Object that allows settings to be accessed with attributes.
@@ -32,14 +65,17 @@ class SettingsHolder:
                                on setting attribute access, and the result of the function is
                                returned instead of the function.
         :param removed_settings: Settings that have been removed in the past.
+        :param validators: Validators for the settings. The validators are called on first attribute access.
         """
         self.setting_name = setting_name
         self.defaults = defaults or {}
         self.import_strings = import_strings or set()
         self.removed_settings = removed_settings or set()
+        self.validators = validators or {}
         self._cached_attrs: Set[str] = set()
 
     def __getattr__(self, attr: str) -> Any:
+        """This gets called on first attribute access, since the setting is not yet cached with setattr()."""
         from django.conf import settings
 
         if attr not in self.defaults:
@@ -60,12 +96,15 @@ class SettingsHolder:
         # Settings with bytes will call the imported function immediately
         elif bytes(attr, encoding="utf-8") in self.import_strings:
             val = self.perform_import(val, attr)
-            if isinstance(val, list):
+            if isinstance(val, Sequence):
                 val = [v() if callable(v) else v for v in val]
-            elif isinstance(val, dict):
+            elif isinstance(val, Mapping):
                 val = {k: v() if callable(v) else v for k, v in val.items()}
             else:
                 val = val()
+
+        if attr in self.validators:
+            self.validators[attr](val)
 
         # Cache the result
         self._cached_attrs.add(attr)

@@ -35,8 +35,8 @@ body:
         If you are not using the latest version, please try to also reproduce the bug
         on the latest version before opening the issue.
       options:
+        - "0.1.1"
         - "0.1.0"
-        - "0.0.5"
     validations:
       required: true
   - type: dropdown
@@ -46,6 +46,7 @@ body:
       description: >-
         Please note that python versions not available below are not supported.
       options:
+        - "3.12"
         - "3.11"
         - "3.10"
         - "3.9"

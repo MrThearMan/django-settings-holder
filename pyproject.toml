@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "django-settings-holder"
-version = "0.1.0"
+version = "0.1.1"
 description = "Object that allows settings to be accessed with attributes."
 authors = [
     "Matti Lamppu <lamppu.matti.akseli@gmail.com>",
@@ -36,6 +36,7 @@ classifiers = [
     "Framework :: Django :: 4.0",
     "Framework :: Django :: 4.1",
     "Framework :: Django :: 4.2",
+    "Framework :: Django :: 5.0",
     "Intended Audience :: Developers",
     "Natural Language :: English",
 ]
@@ -46,16 +47,19 @@ exclude = [
 [tool.poetry.urls]
 "Bug Tracker" = "https://github.com/MrThearMan/django-settings-holder/issues"
 
+[tool.poetry.plugins.pytest11]
+graphene_django_extensions = "settings_holder.fixtures"
+
 [tool.poetry.dependencies]
-python = ">=3.8,<4"
+python = ">=3.9,<4"
 
 [tool.poetry.group.test.dependencies]
 Django = "4.2.9"
 pytest = "7.4.4"
 coverage = "7.4.0"
 pytest-django = "4.7.0"
-pre-commit = "3.5.0"
-tox = "4.11.4"
+pre-commit = "3.6.0"
+tox = "4.12.0"
 tox-gh-actions = "3.2.0"
 
 [tool.poetry.group.docs.dependencies]
@@ -122,7 +126,7 @@ ignore = [
     "ANN401",   # Any is allowed
     "S311",     # random-module is OK.
     #
-    # Conflicting with ruff-format
+    # Conflicting with ruff-format.
     #
     "COM812",   # missing-trailing-comma
     "COM819",   # prohibited-trailing-comma
@@ -170,12 +174,11 @@ addopts = "-vv -s --log-cli-level=INFO"
 [tool.tox]
 legacy_tox_ini = """
 [tox]
-envlist = py{38, 39, 310, 311, 312}-django{32, 40, 41, 42}
+envlist = py{39, 310, 311, 312}-django{32, 40, 41, 42, 50}
 isolated_build = true
 
 [gh-actions]
 python =
-    3.8: py38
     3.9: py39
     3.10: py310
     3.11: py311
@@ -191,6 +194,8 @@ deps =
     django40: Django >=4.0,<4.1
     django41: Django >=4.1,<4.2
     django42: Django >=4.2,<4.3
+    py39-django50: Django >=4.2,<4.3
+    py{310, 311, 312}-django50: Django >=5.0,<5.1
 
     pytest
     coverage

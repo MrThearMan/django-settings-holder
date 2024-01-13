@@ -29,7 +29,7 @@ This library provides utilities for Django extensions that want to define their 
 Settings can be included in a SettingsHolder that allows them to be accessed via attributes.
 User defined settings can be reloaded automatically to the SettingsHolder from the `setting_changed` signal.
 Functions in dot import notation are automatically imported so that the imported function is available in
-the SettingsHolder.
+the SettingsHolder. You can also define validators for settings that will be run when the setting is first accessed.
 
 
 [coverage-badge]: https://coveralls.io/repos/github/MrThearMan/django-settings-holder/badge.svg?branch=main
