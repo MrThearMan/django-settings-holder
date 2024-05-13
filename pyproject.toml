@@ -54,11 +54,11 @@ django_settings_holder = "settings_holder.fixtures"
 python = ">=3.9,<4"
 
 [tool.poetry.group.test.dependencies]
-Django = "4.2.11"
+Django = "4.2.13"
 pytest = "8.2.0"
 coverage = "7.5.1"
 pytest-django = "4.8.0"
-pre-commit = "3.7.0"
+pre-commit = "3.7.1"
 tox = "4.15.0"
 tox-gh-actions = "3.2.0"
 
