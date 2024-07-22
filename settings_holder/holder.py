@@ -45,7 +45,7 @@ class SettingsHolder:
     Any setting with string import paths will be automatically resolved.
     """
 
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
         setting_name: str,
         defaults: Optional[Dict[str, Any]] = None,
