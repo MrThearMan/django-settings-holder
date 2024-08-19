@@ -7,7 +7,7 @@ __all__ = [
 ]
 
 
-@pytest.fixture()
+@pytest.fixture
 def django_settings() -> SettingsWrapper:
     """A Django settings object which restores changes after the testrun."""
     wrapper = SettingsWrapper()
