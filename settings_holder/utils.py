@@ -7,8 +7,8 @@ if TYPE_CHECKING:
 
 
 __all__ = [
-    "reload_settings",
     "SettingsWrapper",
+    "reload_settings",
 ]
 
 

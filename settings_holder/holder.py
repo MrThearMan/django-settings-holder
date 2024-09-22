@@ -30,9 +30,11 @@ setting_changed.connect(reload_my_settings)
 ------------------------------------------------------------------------------
 """
 
+from __future__ import annotations
+
+import sys
 from importlib import import_module
-from sys import modules
-from typing import Any, Callable, Dict, Mapping, Optional, Sequence, Set, Union
+from typing import Any, Callable, Mapping, Optional, Sequence, Union
 
 __all__ = [
     "SettingsHolder",
@@ -48,10 +50,10 @@ class SettingsHolder:
     def __init__(
         self,
         setting_name: str,
-        defaults: Optional[Dict[str, Any]] = None,
-        import_strings: Optional[Set[Union[str, bytes]]] = None,
-        removed_settings: Optional[Set[str]] = None,
-        validators: Optional[Dict[str, Callable[[Any], None]]] = None,
+        defaults: Optional[dict[str, Any]] = None,
+        import_strings: Optional[set[Union[str, bytes]]] = None,
+        removed_settings: Optional[set[str]] = None,
+        validators: Optional[dict[str, Callable[[Any], None]]] = None,
     ) -> None:
         """
         Object that allows settings to be accessed with attributes.
@@ -72,7 +74,7 @@ class SettingsHolder:
         self.import_strings = import_strings or set()
         self.removed_settings = removed_settings or set()
         self.validators = validators or {}
-        self._cached_attrs: Set[str] = set()
+        self._cached_attrs: set[str] = set()
 
     def __getattr__(self, attr: str) -> Any:
         """This gets called on first attribute access, since the setting is not yet cached with setattr()."""
@@ -136,10 +138,10 @@ class SettingsHolder:
             msg = f"{msg}: {val} doesn't look like a module path."
             raise ImportError(msg) from error
 
-        if module_path not in modules or (
+        if module_path not in sys.modules or (
             # Module is not fully initialized.
-            getattr(modules[module_path], "__spec__", None) is not None
-            and getattr(modules[module_path].__spec__, "_initializing", False) is True
+            getattr(sys.modules[module_path], "__spec__", None) is not None
+            and getattr(sys.modules[module_path].__spec__, "_initializing", False) is True
         ):
             try:
                 import_module(module_path)
@@ -148,7 +150,7 @@ class SettingsHolder:
                 raise ImportError(msg) from error
 
         try:
-            return getattr(modules[module_path], class_name)
+            return getattr(sys.modules[module_path], class_name)
         except AttributeError as error:
             msg = f"{msg}: Module '{module_path}' does not define a '{class_name}' attribute/class"
             raise ImportError(msg) from error
