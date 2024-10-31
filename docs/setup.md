@@ -17,13 +17,21 @@ SETTING_NAME: str = "..."
 # All the settings that the setting accepts, and their defaults
 DEFAULTS: dict[str, Any] = {"foo": "bar"}
 
-# If these settings contain strings, or list or dict containing
-# strings, they will be considered "dot import strings" to functions.
-# The SettingsHolder will try to import these string to functions
-# when the corresponding attribute is accessed. If the name is a
-# byte string (b"..."), the imported function will be called
-# immediately with no arguments, and the result returned
-# instead of the imported function.
+# By adding a setting's name to this set, that setting should
+# contain a "dot import string" to a function.
+# The SettingsHolder will try to import these functions
+# when the corresponding attribute is accessed.
+#
+# If the name is a byte string (b"..."), the imported function
+# will be called immediately with no arguments, and the result
+# returned instead of the imported function.
+#
+# You can also specify nested attributes in lists of dicts:
+# Use "FOO.BAR" to indicate that the "BAR" key of a dictionary setting
+# "FOO" should be imported, but not the other keys of the dictionary.
+# Use "FOO.0" to indicate that all elements of a list setting
+# "FOO" should be imported. These can be nested as deeply as you want,
+# and combined with the byte string notation.
 IMPORT_STRINGS: set[bytes | str] = set()
 
 # Settings that were once available but no longer are.
