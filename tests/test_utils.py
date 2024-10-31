@@ -179,6 +179,49 @@ def test_settings_holder__import_function__dict__called_on_access():
     assert holder.FOO["BAR"] == "foo"
 
 
+def test_settings_holder__import_function__dict__all_keys():
+    holder = SettingsHolder(
+        setting_name="MOCK_SETTING",
+        defaults={"FOO": {"BAR": "tests.test_utils.function", "BAZ": "tests.test_utils.function"}},
+        import_strings={"FOO.*"},
+    )
+
+    assert function == holder.FOO["BAR"]
+    assert function == holder.FOO["BAZ"]
+
+
+def test_settings_holder__import_function__dict__all_keys__not_string():
+    holder = SettingsHolder(
+        setting_name="MOCK_SETTING",
+        defaults={"FOO": {"BAR": {"foo": "tests.test_utils.function"}}},
+        import_strings={"FOO.*"},
+    )
+
+    error = "'FOO.BAR' should be a string. Got {'foo': 'tests.test_utils.function'}."
+    with pytest.raises(ValueError, match=exact(error)):
+        x = holder.FOO["BAR"]
+
+
+def test_settings_holder__import_function__dict__all_keys__deeper():
+    holder = SettingsHolder(
+        setting_name="MOCK_SETTING",
+        defaults={"FOO": {"BAR": {"FOO": "tests.test_utils.function"}}},
+        import_strings={"FOO.*.FOO"},
+    )
+
+    assert function == holder.FOO["BAR"]["FOO"]
+
+
+def test_settings_holder__import_function__dict__all_keys__bytes():
+    holder = SettingsHolder(
+        setting_name="MOCK_SETTING",
+        defaults={"FOO": {"BAR": "tests.test_utils.function"}},
+        import_strings={b"FOO.*"},
+    )
+
+    assert holder.FOO["BAR"] == "foo"
+
+
 def test_settings_holder__import_function__does_not_exist():
     holder = SettingsHolder(
         setting_name="MOCK_SETTING",
@@ -198,7 +241,7 @@ def test_settings_holder__import_function__not_valid():
         import_strings={"FOO"},
     )
 
-    error = "'FOO' should be a string or a mutable sequence or mapping containing them. Got 1."
+    error = "'FOO' should be a string. Got 1."
     with pytest.raises(ValueError, match=exact(error)):
         x = holder.FOO
 
@@ -210,7 +253,7 @@ def test_settings_holder__import_function__not_valid__nested():
         import_strings={"FOO.BAR"},
     )
 
-    error = "'FOO.BAR' should be a string or a mutable sequence or mapping containing them. Got 1."
+    error = "'FOO.BAR' should be a string. Got 1."
     with pytest.raises(ValueError, match=exact(error)):
         x = holder.FOO
 
@@ -222,7 +265,7 @@ def test_settings_holder__import_function__not_in_import_strings():
         import_strings={"FOO.BAR"},
     )
 
-    error = "'FOO' should be a string or a mutable sequence or mapping containing them. Got 1."
+    error = "'FOO' should be a mutable sequence or mapping. Got 1."
     with pytest.raises(ValueError, match=exact(error)):
         x = holder.FOO
 

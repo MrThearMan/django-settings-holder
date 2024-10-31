@@ -27,11 +27,18 @@ DEFAULTS: dict[str, Any] = {"foo": "bar"}
 # returned instead of the imported function.
 #
 # You can also specify nested attributes in lists of dicts:
-# Use "FOO.BAR" to indicate that the "BAR" key of a dictionary setting
+#
+# 1) Use "FOO.0" to indicate that all elements of a list setting
+# "FOO" should be imported.
+#
+# 2) Use "FOO.BAR" to indicate that the "BAR" key of a dictionary setting
 # "FOO" should be imported, but not the other keys of the dictionary.
-# Use "FOO.0" to indicate that all elements of a list setting
-# "FOO" should be imported. These can be nested as deeply as you want,
-# and combined with the byte string notation.
+#
+# 3) Use "FOO.*" to indicate that any values of the setting
+# "FOO" should be imported. Useful for dynamic settings
+#
+# These rules can be nested as deeply as you want, and combined with
+# the byte string notation (e.g. "FOO.*.BAR.0" or b"FOO.0.*").
 IMPORT_STRINGS: set[bytes | str] = set()
 
 # Settings that were once available but no longer are.

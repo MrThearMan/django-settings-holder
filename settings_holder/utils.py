@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Callable
 
 if TYPE_CHECKING:
@@ -72,3 +73,10 @@ class SettingsWrapper:
             override.disable()
 
         del self.__to_restore[:]
+
+
+@dataclass
+class ImportSettingResults:
+    is_import: bool
+    is_immidiate: bool
+    is_nested: bool

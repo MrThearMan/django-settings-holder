@@ -36,16 +36,15 @@ import sys
 from importlib import import_module
 from typing import Any, Callable, MutableMapping, MutableSequence, Optional, Union
 
+from .utils import ImportSettingResults
+
 __all__ = [
     "SettingsHolder",
 ]
 
 
 class SettingsHolder:
-    """
-    Object that allows settings to be accessed with attributes.
-    Any setting with string import paths will be automatically resolved.
-    """
+    """Object that allows settings to be accessed with attributes and automatically updated from user settings."""
 
     def __init__(
         self,
@@ -111,46 +110,54 @@ class SettingsHolder:
 
     def make_imports(self, name: str, value: Any) -> Any:
         """Make the necessary imports for the given setting, recursing inside mutable sequences and mappings."""
-        is_import, is_immidiate = self.is_import_setting(name)
-        if not is_import:
+        results = self.is_import_setting(name)
+        if not results.is_import:
             return value
 
-        if isinstance(value, str):
+        if not results.is_nested:
+            if not isinstance(value, str):
+                msg = f"{name!r} should be a string. Got {value!r}."
+                raise ValueError(msg)
+
             value = self.import_from_string(value, name)
-            if is_immidiate:
+            if results.is_immidiate:
                 return value()
             return value
 
         if isinstance(value, MutableSequence):
-            for i, val in enumerate(value):
-                value[i] = self.make_imports(f"{name}.0", val)
+            for i in range(len(value)):
+                value[i] = self.make_imports(f"{name}.0", value[i])
             return value
 
         if isinstance(value, MutableMapping):
-            for key, val in value.items():
-                value[key] = self.make_imports(f"{name}.{key}", val)
-
+            for key in list(value):
+                value[key] = self.make_imports(f"{name}.{key}", value[key])
             return value
 
-        msg = f"{name!r} should be a string or a mutable sequence or mapping containing them. Got {value!r}."
+        msg = f"{name!r} should be a mutable sequence or mapping. Got {value!r}."
         raise ValueError(msg)
 
-    def is_import_setting(self, attr: str) -> tuple[bool, bool]:  # (is_import, is_immidiate)
-        if attr in self._imports:
-            return True, False
+    def is_import_setting(self, attr: str) -> ImportSettingResults:
+        for value in self._imports:
+            is_immidiate = isinstance(value, bytes)
+            if is_immidiate:
+                value = value.decode("utf8")  # noqa: PLW2901
 
-        attr_bytes = bytes(attr, encoding="utf8")
-        if attr_bytes in self._imports:
-            return True, True
+            name = self.substitute_wildcards(attr, value)
 
-        for string in self._imports:
-            if isinstance(string, str) and string.startswith(f"{attr}."):
-                return True, False
+            if name.startswith(attr):
+                is_nested = len(name) > len(attr)
+                return ImportSettingResults(is_import=True, is_immidiate=is_immidiate, is_nested=is_nested)
 
-            if isinstance(string, bytes) and string.startswith(attr_bytes + b"."):
-                return True, True
+        return ImportSettingResults(is_import=False, is_immidiate=False, is_nested=False)
 
-        return False, False
+    def substitute_wildcards(self, attr: str, value: str) -> str:
+        """Substitute wildcards in 'value' with the matching parts in 'attr' when both are split by periods."""
+        attr_parts = attr.split(".")
+        return ".".join(
+            attr_parts[idx] if part == "*" and len(attr_parts) > idx else part
+            for idx, part in enumerate(value.split("."))
+        )
 
     @staticmethod
     def import_from_string(val: str, setting: str) -> Callable[..., Any]:
