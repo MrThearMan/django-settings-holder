@@ -34,7 +34,7 @@ from __future__ import annotations
 
 import sys
 from importlib import import_module
-from typing import Any, Callable, Mapping, Optional, Sequence, Union
+from typing import Any, Callable, MutableMapping, MutableSequence, Optional, Union
 
 __all__ = [
     "SettingsHolder",
@@ -69,68 +69,96 @@ class SettingsHolder:
         :param removed_settings: Settings that have been removed in the past.
         :param validators: Validators for the settings. The validators are called on first attribute access.
         """
-        self.setting_name = setting_name
-        self.defaults = defaults or {}
-        self.import_strings = import_strings or set()
-        self.removed_settings = removed_settings or set()
-        self.validators = validators or {}
+        self._setting_name = setting_name
+        self._defaults = defaults or {}
+        self._imports = import_strings or set()
+        self._removed_settings = removed_settings or set()
+        self._validators = validators or {}
         self._cached_attrs: set[str] = set()
 
     def __getattr__(self, attr: str) -> Any:
-        """This gets called on first attribute access, since the setting is not yet cached with setattr()."""
+        # Called for each setting the first time it is accessed.
         from django.conf import settings
 
-        if attr not in self.defaults:
-            if attr in self.removed_settings:
+        if attr not in self._defaults:
+            if attr in self._removed_settings:
                 msg = f"This setting has been removed: {attr!r}."
                 raise AttributeError(msg)
             msg = f"Invalid Setting: {attr!r}."
             raise AttributeError(msg)
 
         try:
-            val = getattr(settings, self.setting_name, {})[attr]
+            value = getattr(settings, self._setting_name, {})[attr]
         except KeyError:
-            val = self.defaults[attr]
+            value = self._defaults[attr]
 
-        if attr in self.import_strings:
-            val = self.perform_import(val, attr)
+        value = self.make_imports(attr, value)
 
-        # Settings with bytes will call the imported function immediately
-        elif bytes(attr, encoding="utf-8") in self.import_strings:
-            val = self.perform_import(val, attr)
-            if isinstance(val, Sequence):
-                val = [v() if callable(v) else v for v in val]
-            elif isinstance(val, Mapping):
-                val = {k: v() if callable(v) else v for k, v in val.items()}
-            else:
-                val = val()
+        if attr in self._validators:
+            self._validators[attr](value)
 
-        if attr in self.validators:
-            self.validators[attr](val)
+        # Cache the result by setting the attribute to the holder.
+        # With this, accessing the attribute will not trigger this '__getattr__'.
+        setattr(self, attr, value)
+        return value
 
-        # Cache the result
-        self._cached_attrs.add(attr)
-        setattr(self, attr, val)
-        return val
+    def __setattr__(self, attr: str, val: Any) -> None:
+        # If the attribute is not private, and it is a valid setting, note it as cached.
+        # This allows 'reload()' to remove the cached attribute from the holder.
+        if attr[0] != "_" and attr in self._defaults:
+            self._cached_attrs.add(attr)
+        super().__setattr__(attr, val)
 
-    def perform_import(self, val: str, setting: str) -> Any:
-        """If the given setting is a string import notation, then perform the necessary import or imports."""
-        if isinstance(val, str):
-            return self.import_from_string(val, setting)
-        if isinstance(val, Sequence):
-            return [self.import_from_string(item, setting) if isinstance(item, str) else item for item in val]
-        if isinstance(val, Mapping):
-            return {
-                key: self.import_from_string(value, setting) if isinstance(value, str) else value
-                for key, value in val.items()
-            }
+    def make_imports(self, name: str, value: Any) -> Any:
+        """Make the necessary imports for the given setting, recursing inside mutable sequences and mappings."""
+        is_import, is_immidiate = self.is_import_setting(name)
+        if not is_import:
+            return value
 
-        msg = f"'{setting}' should be a dot import statement, or a sequence of them. Got '{val}'."
+        if isinstance(value, str):
+            value = self.import_from_string(value, name)
+            if is_immidiate:
+                return value()
+            return value
+
+        if isinstance(value, MutableSequence):
+            for i, val in enumerate(value):
+                value[i] = self.make_imports(f"{name}.0", val)
+            return value
+
+        if isinstance(value, MutableMapping):
+            for key, val in value.items():
+                value[key] = self.make_imports(f"{name}.{key}", val)
+
+            return value
+
+        msg = f"{name!r} should be a string or a mutable sequence or mapping containing them. Got {value!r}."
         raise ValueError(msg)
+
+    def is_import_setting(self, attr: str) -> tuple[bool, bool]:  # (is_import, is_immidiate)
+        if attr in self._imports:
+            return True, False
+
+        attr_bytes = bytes(attr, encoding="utf8")
+        if attr_bytes in self._imports:
+            return True, True
+
+        for string in self._imports:
+            if isinstance(string, str) and string.startswith(f"{attr}."):
+                return True, False
+
+            if isinstance(string, bytes) and string.startswith(attr_bytes + b"."):
+                return True, True
+
+        return False, False
 
     @staticmethod
     def import_from_string(val: str, setting: str) -> Callable[..., Any]:
-        """Attempt to import a class from a string representation."""
+        """
+        Attempt to import a class from a string representation.
+
+        Adapted from `django.utils.module_loading.import_string`.
+        """
         msg = f"Could not import '{val}' for setting '{setting}'"
         try:
             module_path, class_name = val.rsplit(".", 1)
