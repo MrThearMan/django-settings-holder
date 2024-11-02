@@ -34,7 +34,7 @@ from __future__ import annotations
 
 import sys
 from importlib import import_module
-from typing import Any, Callable, MutableMapping, MutableSequence, Optional, Union
+from typing import Any, Callable, Mapping, Optional, Sequence, Union
 
 from .utils import ImportSettingResults
 
@@ -124,15 +124,11 @@ class SettingsHolder:
                 return value()
             return value
 
-        if isinstance(value, MutableSequence):
-            for i in range(len(value)):
-                value[i] = self.make_imports(f"{name}.0", value[i])
-            return value
+        if isinstance(value, Sequence):
+            return type(value)(self.make_imports(f"{name}.0", val) for val in value)
 
-        if isinstance(value, MutableMapping):
-            for key in list(value):
-                value[key] = self.make_imports(f"{name}.{key}", value[key])
-            return value
+        if isinstance(value, Mapping):
+            return type(value)((key, self.make_imports(f"{name}.{key}", val)) for key, val in value.items())
 
         msg = f"{name!r} should be a mutable sequence or mapping. Got {value!r}."
         raise ValueError(msg)

@@ -144,6 +144,17 @@ def test_settings_holder__import_function__list():
     assert holder.FOO[0] == function
 
 
+def test_settings_holder__import_function__tuple():
+    holder = SettingsHolder(
+        setting_name="MOCK_SETTING",
+        defaults={"FOO": ("tests.test_utils.function",)},
+        import_strings={"FOO.0"},
+    )
+
+    assert isinstance(holder.FOO, tuple)
+    assert holder.FOO[0] == function
+
+
 def test_settings_holder__import_function__list__called_on_access():
     holder = SettingsHolder(
         setting_name="MOCK_SETTING",
