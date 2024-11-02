@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "django-settings-holder"
-version = "0.2.1"
+version = "0.2.2"
 description = "Object that allows settings to be accessed with attributes."
 authors = [
     "Matti Lamppu <lamppu.matti.akseli@gmail.com>",
