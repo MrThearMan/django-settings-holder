@@ -33,8 +33,9 @@ setting_changed.connect(reload_my_settings)
 from __future__ import annotations
 
 import sys
+from collections.abc import Mapping, Sequence
 from importlib import import_module
-from typing import Any, Callable, Mapping, Optional, Sequence, Union
+from typing import Any, Callable, Optional, Union
 
 from .utils import ImportSettingResults
 
