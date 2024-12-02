@@ -53,7 +53,7 @@ python = ">=3.9,<4"
 
 [tool.poetry.group.test.dependencies]
 Django = "4.2.16"
-pytest = "8.3.3"
+pytest = "8.3.4"
 coverage = "7.6.8"
 pytest-django = "4.9.0"
 tox = "4.23.2"
