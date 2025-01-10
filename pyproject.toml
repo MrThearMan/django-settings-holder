@@ -1,25 +1,16 @@
-[tool.poetry]
+[project]
 name = "django-settings-holder"
 version = "0.2.2"
 description = "Object that allows settings to be accessed with attributes."
 authors = [
-    "Matti Lamppu <lamppu.matti.akseli@gmail.com>",
-]
-packages = [
-    { include = "settings_holder" },
+    { name = "Matti Lamppu", email = "lamppu.matti.akseli@gmail.com" },
 ]
 license = "MIT"
 readme = "README.md"
-homepage = "https://github.com/MrThearMan/django-settings-holder"
-repository = "https://github.com/MrThearMan/django-settings-holder"
 keywords = [
     "django",
     "settings",
     "holder",
-]
-include = [
-    "README.md",
-    "LICENSE",
 ]
 classifiers = [
     "Environment :: Web Environment",
@@ -38,21 +29,28 @@ classifiers = [
     "Intended Audience :: Developers",
     "Natural Language :: English",
 ]
-exclude = [
-    "tests",
-]
+requires-python = ">=3.9,<4"
+dynamic = ["dependencies"]
 
-[tool.poetry.urls]
+[project.urls]
+"Homepage" = "https://mrthearman.github.io/django-settings-holder"
+"Repository" = "https://github.com/MrThearMan/django-settings-holder"
 "Bug Tracker" = "https://github.com/MrThearMan/django-settings-holder/issues"
+"Documentation" = "https://mrthearman.github.io/django-settings-holder"
 
-[tool.poetry.plugins.pytest11]
+[project.entry-points.pytest11]
 django_settings_holder = "settings_holder.fixtures"
 
+[tool.poetry]
+requires-poetry = ">=2.0.0"
+packages = [
+    { include = "settings_holder" },
+]
+
 [tool.poetry.dependencies]
-python = ">=3.9,<4"
+Django = ">=4.2"
 
 [tool.poetry.group.test.dependencies]
-Django = "4.2.17"
 pytest = "8.3.4"
 coverage = "7.6.10"
 pytest-django = "4.9.0"
@@ -65,9 +63,7 @@ pymdown-extensions = "10.13"
 mkdocs-mermaid2-plugin = "1.2.1"
 
 [tool.poetry.group.lint.dependencies]
-mypy = "1.14.1"
 pre-commit = "4.0.1"
-django-stubs = "5.1.1"
 
 [tool.ruff]
 fix = true
@@ -243,14 +239,6 @@ banned-from = [
 
 [tool.ruff.lint.pylint]
 max-args = 7
-
-[tool.mypy]
-python_version = "3.13"
-warn_return_any = "True"
-warn_unused_configs = "True"
-plugins = [
-    "mypy_django_plugin.main",
-]
 
 [tool.coverage.run]
 relative_files = true
