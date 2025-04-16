@@ -284,7 +284,6 @@ allowlist_externals =
     poetry
 setenv =
     PYTHONPATH = {toxinidir}
-    DJANGO_SETTINGS_MODULE = "example_project.project.settings"
 deps =
     django42: Django >=4.2,<4.3
     django50: Django >=5.0,<5.1
@@ -292,6 +291,7 @@ deps =
     django52: Django >=5.2,<5.3
 
     pytest
+    pytest-django
     coverage
 commands =
     coverage run -m pytest --disable-warnings {posargs}
