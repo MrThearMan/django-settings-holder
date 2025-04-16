@@ -42,8 +42,11 @@ DEFAULTS: dict[str, Any] = {"foo": "bar"}
 IMPORT_STRINGS: set[bytes | str] = set()
 
 # Settings that were once available but no longer are.
+# Key is the name of the removed setting and value is
+# either `None` if there is no new setting or a string
+# indicating the name of the setting that replaced it.
 # Used for better error messages.
-REMOVED_SETTINGS: set[str] = set()
+REMOVED_SETTINGS: dict[str, str | None] = {}
 
 # Map settings to functions used to validate those settings.
 # Functions should take a single argument, the value of the
