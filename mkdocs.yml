@@ -6,17 +6,16 @@ nav:
 
 theme:
   name: readthedocs
-  highlightjs: true
-  hljs_languages:  # https://github.com/highlightjs/highlight.js/blob/main/SUPPORTED_LANGUAGES.md
-    - python
-    - console
-    - json
+  highlightjs: false  # Use pygments instead.
 
 markdown_extensions:
   pymdownx.highlight:
     anchor_linenums: true
+    linenums: true
   pymdownx.inlinehilite:
+  pymdownx.blocks.details:
   pymdownx.snippets:
+    base_path: docs/snippets
   pymdownx.superfences:
     custom_fences:
       - name: mermaid
@@ -28,7 +27,8 @@ markdown_extensions:
 plugins:
   - search:
   - mermaid2:
-      version: 10.6.1
+      version: 11.4.1
 
 extra_css:
   - css/docs.css
+  - css/pygments.css
