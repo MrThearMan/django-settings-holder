@@ -2,14 +2,13 @@ from pathlib import Path
 
 from django.core.management.utils import get_random_secret_key
 
-
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 DEBUG = True
 SECRET_KEY = get_random_secret_key()
 
-ROOT_URLCONF = "tests.project.urls"
-WSGI_APPLICATION = "tests.project.wsgi.application"
+ROOT_URLCONF = "example_project.project.urls"
+WSGI_APPLICATION = "example_project.project.wsgi.application"
 
 ALLOWED_HOSTS = []
 
@@ -20,6 +19,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "example_project.app",
 ]
 
 MIDDLEWARE = [
@@ -82,3 +82,8 @@ USE_TZ = True
 STATIC_URL = "/static/"
 
 TEST_SETTING = "foo"
+
+
+EXAMPLE_SETTINGS = {
+    "FOO": "bar",
+}

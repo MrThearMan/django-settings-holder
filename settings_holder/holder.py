@@ -33,11 +33,14 @@ setting_changed.connect(reload_my_settings)
 from __future__ import annotations
 
 import sys
-from collections.abc import Mapping, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from importlib import import_module
-from typing import Any, Callable, Optional, Union
+from typing import Any, Optional, Union
 
-from .utils import ImportSettingResults
+from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
+
+from .utils import ImportSettingResults, settings_configured
 
 __all__ = [
     "SettingsHolder",
@@ -52,7 +55,7 @@ class SettingsHolder:
         setting_name: str,
         defaults: Optional[dict[str, Any]] = None,
         import_strings: Optional[set[Union[str, bytes]]] = None,
-        removed_settings: Optional[set[str]] = None,
+        removed_settings: Optional[dict[str, str | None]] = None,
         validators: Optional[dict[str, Callable[[Any], None]]] = None,
     ) -> None:
         """
@@ -72,23 +75,31 @@ class SettingsHolder:
         self._setting_name = setting_name
         self._defaults = defaults or {}
         self._imports = import_strings or set()
-        self._removed_settings = removed_settings or set()
+        self._removed_settings = removed_settings or {}
         self._validators = validators or {}
         self._cached_attrs: set[str] = set()
 
-    def __getattr__(self, attr: str) -> Any:
-        # Called for each setting the first time it is accessed.
-        from django.conf import settings
+        dispatch_uid = f"configure_{setting_name.lower()}"
+        settings_configured.connect(self.check_user_settings, dispatch_uid=dispatch_uid)
+        self._settings_checked = False
 
-        if attr not in self._defaults:
-            if attr in self._removed_settings:
-                msg = f"This setting has been removed: {attr!r}."
-                raise AttributeError(msg)
-            msg = f"Invalid Setting: {attr!r}."
-            raise AttributeError(msg)
+        if settings.configured:
+            self.check_user_settings()
+
+    def __getattr__(self, attr: str) -> Any:
+        if not settings.configured:  # pragma: no cover
+            msg = "Settings are not configured."
+            raise ImproperlyConfigured(msg)
+
+        if not self._settings_checked:
+            self.check_user_settings(accessed_setting=attr)
+        else:
+            self.check_setting(name=attr)
+
+        user_settings: dict[str, Any] = getattr(settings, self._setting_name, {})
 
         try:
-            value = getattr(settings, self._setting_name, {})[attr]
+            value = user_settings[attr]
         except KeyError:
             value = self._defaults[attr]
 
@@ -109,6 +120,43 @@ class SettingsHolder:
             self._cached_attrs.add(attr)
         super().__setattr__(attr, val)
 
+    def check_user_settings(self, **kwargs: Any) -> None:  # 'kwargs' for signal compatibility
+        user_settings: set[str] = set(getattr(settings, self._setting_name, {}))
+
+        accessed_setting = kwargs.get("accessed_setting")
+        if accessed_setting is not None:
+            user_settings.add(accessed_setting)
+
+        errors: list[str] = []
+
+        for user_setting in user_settings:
+            try:
+                self.check_setting(user_setting)
+
+            except ImproperlyConfigured as error:  # noqa: PERF203
+                errors.append(str(error))
+
+        if errors:
+            raise ImproperlyConfigured("\n".join(errors))
+
+        self._settings_checked = True
+
+    def check_setting(self, name: str) -> None:
+        if name in self._defaults:
+            return
+
+        if name not in self._removed_settings:
+            msg = f"Setting '{self._setting_name}.{name}' does not exist."
+            raise ImproperlyConfigured(msg)
+
+        new_setting = self._removed_settings[name]
+
+        msg = f"Setting '{self._setting_name}.{name}' has been removed."
+        if new_setting is not None:
+            msg += f" Use '{self._setting_name}.{new_setting}' instead."
+
+        raise ImproperlyConfigured(msg)
+
     def make_imports(self, name: str, value: Any) -> Any:
         """Make the necessary imports for the given setting, recursing inside mutable sequences and mappings."""
         results = self.is_import_setting(name)
@@ -121,7 +169,7 @@ class SettingsHolder:
                 raise ValueError(msg)
 
             value = self.import_from_string(value, name)
-            if results.is_immidiate:
+            if results.is_immediate:
                 return value()
             return value
 
@@ -136,17 +184,17 @@ class SettingsHolder:
 
     def is_import_setting(self, attr: str) -> ImportSettingResults:
         for value in self._imports:
-            is_immidiate = isinstance(value, bytes)
-            if is_immidiate:
+            is_immediate = isinstance(value, bytes)
+            if is_immediate:
                 value = value.decode("utf8")  # noqa: PLW2901
 
             name = self.substitute_wildcards(attr, value)
 
             if name.startswith(attr):
                 is_nested = len(name) > len(attr)
-                return ImportSettingResults(is_import=True, is_immidiate=is_immidiate, is_nested=is_nested)
+                return ImportSettingResults(is_import=True, is_immediate=is_immediate, is_nested=is_nested)
 
-        return ImportSettingResults(is_import=False, is_immidiate=False, is_nested=False)
+        return ImportSettingResults(is_import=False, is_immediate=False, is_nested=False)
 
     def substitute_wildcards(self, attr: str, value: str) -> str:
         """Substitute wildcards in 'value' with the matching parts in 'attr' when both are split by periods."""
@@ -191,3 +239,4 @@ class SettingsHolder:
         for attr in self._cached_attrs:
             delattr(self, attr)
         self._cached_attrs.clear()
+        self._settings_checked = False

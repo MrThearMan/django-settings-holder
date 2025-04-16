@@ -1,9 +1,15 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Callable
+from functools import wraps
+from typing import TYPE_CHECKING, Any, ParamSpec, TypeVar
 
-if TYPE_CHECKING:
+from django.conf import settings
+from django.dispatch import Signal
+
+if TYPE_CHECKING:  # pragma: no cover
+    from collections.abc import Callable
+
     from .holder import SettingsHolder
 
 
@@ -78,5 +84,46 @@ class SettingsWrapper:
 @dataclass
 class ImportSettingResults:
     is_import: bool
-    is_immidiate: bool
+    is_immediate: bool
     is_nested: bool
+
+
+T = TypeVar("T")
+P = ParamSpec("P")
+
+
+def setup_settings_configured_signal() -> None:
+    """Setup a signal that fires when settings are configured for the first time."""
+    orig_conf = settings.configure
+    orig_setup = settings._setup
+
+    configured: bool = False
+
+    def signal_wrapper(func: Callable[P, T]) -> Callable[P, T]:
+        @wraps(func)
+        def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
+            nonlocal configured
+
+            func(*args, **kwargs)
+
+            if not configured:
+                configured = True
+
+                signal_kwargs: dict[str, Any] = {}
+
+                # If _setup() was called, the first argument is the name of the accessed setting.
+                if len(args) == 1 and isinstance(args[0], str):
+                    signal_kwargs["accessed_setting"] = args[0]
+
+                settings_configured.send(None, **signal_kwargs)
+
+        return wrapper
+
+    object.__setattr__(settings, orig_conf.__name__, signal_wrapper(orig_conf))
+    object.__setattr__(settings, orig_setup.__name__, signal_wrapper(orig_setup))
+
+
+settings_configured = Signal()
+"""Sent when settings are configured for the first time."""
+
+setup_settings_configured_signal()

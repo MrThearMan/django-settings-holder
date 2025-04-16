@@ -14,10 +14,10 @@ keywords = [
 ]
 classifiers = [
     "Environment :: Web Environment",
+    "Intended Audience :: Developers",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -26,10 +26,9 @@ classifiers = [
     "Framework :: Django :: 4.2",
     "Framework :: Django :: 5.0",
     "Framework :: Django :: 5.1",
-    "Intended Audience :: Developers",
-    "Natural Language :: English",
+    "Framework :: Django :: 5.2",
 ]
-requires-python = ">=3.9,<4"
+requires-python = ">=3.10,<4"
 dynamic = ["dependencies"]
 
 [project.urls]
@@ -51,19 +50,20 @@ packages = [
 Django = ">=4.2"
 
 [tool.poetry.group.test.dependencies]
-pytest = "8.3.4"
-coverage = "7.6.10"
-pytest-django = "4.9.0"
-tox = "4.23.2"
-tox-gh-actions = "3.2.0"
+pytest = "8.3.5"
+pytest-django = "4.11.1"
+coverage = "7.8.0"
+tox = "4.25.0"
+tox-gh-actions = "3.3.0"
 
 [tool.poetry.group.docs.dependencies]
 mkdocs = "1.6.1"
-pymdown-extensions = "10.13"
+pymdown-extensions = "10.14.3"
+pygments = "2.19.1"
 mkdocs-mermaid2-plugin = "1.2.1"
 
 [tool.poetry.group.lint.dependencies]
-pre-commit = "4.0.1"
+pre-commit = "4.2.0"
 
 [tool.ruff]
 fix = true
@@ -242,15 +242,20 @@ max-args = 7
 
 [tool.coverage.run]
 relative_files = true
+branch = true
+source = [
+    "settings_holder/",
+]
 
 [tool.coverage.report]
 omit = [
+    "example_project/*",
     "tests/*",
     "docs/*",
     ".venv/*",
     ".tox/*",
 ]
-exclude_lines = [
+exclude_also = [
     "if TYPE_CHECKING:",
     "except ImportError:",
     "pragma: no cover",
@@ -258,17 +263,17 @@ exclude_lines = [
 ]
 
 [tool.pytest.ini_options]
-addopts = "-vv -s  --disable-warnings --log-cli-level=INFO"
+DJANGO_SETTINGS_MODULE = "example_project.project.settings"
+addopts = "--disable-warnings"
 
 [tool.tox]
 legacy_tox_ini = """
 [tox]
-envlist = py{39, 310, 311, 312, 313}-django{42, 50, 51}
+envlist = py{310, 311, 312, 313}-django{42, 50, 51, 52}
 isolated_build = true
 
 [gh-actions]
 python =
-    3.9: py39
     3.10: py310
     3.11: py311
     3.12: py312
@@ -281,19 +286,16 @@ setenv =
     PYTHONPATH = {toxinidir}
 deps =
     django42: Django >=4.2,<4.3
-
-    py39-django50: Django >=4.2,<4.3
-    py{310, 311, 312, 313}-django50: Django >=5.0,<5.1
-
-    py39-django51: Django >=4.2,<4.3
-    py{310, 311, 312, 313}-django51: Django >=5.1,<5.2
+    django50: Django >=5.0,<5.1
+    django51: Django >=5.1,<5.2
+    django52: Django >=5.2,<5.3
 
     pytest
     coverage
 commands =
-    coverage run -m pytest -vv -s --disable-warnings --log-cli-level=INFO
+    coverage run -m pytest --disable-warnings {posargs}
 """
 
 [build-system]
-requires = ["poetry-core>=1.9.0"]
+requires = ["poetry-core>=2.0.0"]
 build-backend = "poetry.core.masonry.api"

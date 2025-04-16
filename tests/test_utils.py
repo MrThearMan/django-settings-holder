@@ -1,7 +1,7 @@
-# ruff: noqa: PGH004
 from unittest.mock import patch
 
 import pytest
+from django.core.exceptions import ImproperlyConfigured
 
 from settings_holder import SettingsHolder, SettingsWrapper, reload_settings
 from tests.helpers import exact
@@ -18,7 +18,7 @@ def test_settings_holder__defaults():
     assert holder._setting_name == "MOCK_SETTING"
     assert holder._defaults == {}
     assert holder._imports == set()
-    assert holder._removed_settings == set()
+    assert holder._removed_settings == {}
 
 
 def test_settings_holder__setting_cached(django_settings):
@@ -61,11 +61,11 @@ def test_settings_holder__setting_not_in_defaults(django_settings):
 
     assert holder._defaults == {"FOO": "baz"}
     assert holder._imports == set()
-    assert holder._removed_settings == set()
+    assert holder._removed_settings == {}
 
-    msg = "Invalid Setting: 'ERROR'."
-    with pytest.raises(AttributeError, match=exact(msg)):
-        x = holder.ERROR
+    msg = "Setting 'MOCK_SETTING.ERROR' does not exist."
+    with pytest.raises(ImproperlyConfigured, match=exact(msg)):
+        _x = holder.ERROR
 
 
 def test_settings_holder__using_removed_setting(django_settings):
@@ -73,31 +73,80 @@ def test_settings_holder__using_removed_setting(django_settings):
     holder = SettingsHolder(
         setting_name="MOCK_SETTING",
         defaults={"FOO": "baz"},
-        removed_settings={"FIZZ"},
+        removed_settings={"FIZZ": None},
     )
 
-    msg = "This setting has been removed: 'FIZZ'."
-    with pytest.raises(AttributeError, match=exact(msg)):
-        x = holder.FIZZ
+    msg = "Setting 'MOCK_SETTING.FIZZ' has been removed."
+    with pytest.raises(ImproperlyConfigured, match=exact(msg)):
+        _x = holder.FIZZ
+
+
+def test_settings_holder__using_removed_setting__has_replacement(django_settings):
+    django_settings.MOCK_SETTING = {"FOO": "bar"}
+    holder = SettingsHolder(
+        setting_name="MOCK_SETTING",
+        defaults={"FOO": "baz"},
+        removed_settings={"FIZZ": "FOO"},
+    )
+
+    msg = "Setting 'MOCK_SETTING.FIZZ' has been removed. Use 'MOCK_SETTING.FOO' instead."
+    with pytest.raises(ImproperlyConfigured, match=exact(msg)):
+        _x = holder.FIZZ
+
+
+def test_settings_holder__user_has_removed_setting(django_settings):
+    django_settings.MOCK_SETTING = {"FOO": "bar", "FIZZ": "buzz"}
+
+    msg = "Setting 'MOCK_SETTING.FIZZ' has been removed."
+    with pytest.raises(ImproperlyConfigured, match=exact(msg)):
+        SettingsHolder(
+            setting_name="MOCK_SETTING",
+            defaults={"FOO": "baz"},
+            removed_settings={"FIZZ": None},
+        )
+
+
+def test_settings_holder__user_has_removed_setting__has_replacement(django_settings):
+    django_settings.MOCK_SETTING = {"FOO": "bar", "FIZZ": "buzz"}
+
+    msg = "Setting 'MOCK_SETTING.FIZZ' has been removed. Use 'MOCK_SETTING.FOO' instead."
+    with pytest.raises(ImproperlyConfigured, match=exact(msg)):
+        SettingsHolder(
+            setting_name="MOCK_SETTING",
+            defaults={"FOO": "baz"},
+            removed_settings={"FIZZ": "FOO"},
+        )
 
 
 def test_settings_holder__using_undefined_setting(django_settings):
-    django_settings.MOCK_SETTING = {"FOO": "bar", "FIZZ": "buzz"}
+    django_settings.MOCK_SETTING = {"FOO": "bar"}
+
     holder = SettingsHolder(
         setting_name="MOCK_SETTING",
         defaults={"FOO": "baz"},
     )
 
-    msg = "Invalid Setting: 'FIZZ'."
-    with pytest.raises(AttributeError, match=exact(msg)):
-        x = holder.FIZZ
+    msg = "Setting 'MOCK_SETTING.FIZZ' does not exist."
+    with pytest.raises(ImproperlyConfigured, match=exact(msg)):
+        _x = holder.FIZZ
+
+
+def test_settings_holder__user_has_undefined_setting(django_settings):
+    django_settings.MOCK_SETTING = {"FOO": "bar", "FIZZ": "buzz"}
+
+    msg = "Setting 'MOCK_SETTING.FIZZ' does not exist."
+    with pytest.raises(ImproperlyConfigured, match=exact(msg)):
+        SettingsHolder(
+            setting_name="MOCK_SETTING",
+            defaults={"FOO": "baz"},
+        )
 
 
 def test_settings_holder__setting_validator(django_settings):
     def validator(value: str) -> None:
         if value != "bar":
-            msg = "Value must be 'bar'."
-            raise ValueError(msg)
+            _msg = "Value must be 'bar'."
+            raise ValueError(_msg)
 
     django_settings.MOCK_SETTING = {"FOO": "bar", "FIZZ": "buzz"}
     holder = SettingsHolder(
@@ -105,11 +154,10 @@ def test_settings_holder__setting_validator(django_settings):
         defaults={"FOO": "1", "FIZZ": "bar"},
         validators={"FOO": validator, "FIZZ": validator},
     )
-    x = holder.FOO
 
     msg = "Value must be 'bar'."
     with pytest.raises(ValueError, match=exact(msg)):
-        x = holder.FIZZ
+        _x = holder.FIZZ
 
 
 def test_settings_holder__import_function():
@@ -210,7 +258,7 @@ def test_settings_holder__import_function__dict__all_keys__not_string():
 
     error = "'FOO.BAR' should be a string. Got {'foo': 'tests.test_utils.function'}."
     with pytest.raises(ValueError, match=exact(error)):
-        x = holder.FOO["BAR"]
+        _x = holder.FOO["BAR"]
 
 
 def test_settings_holder__import_function__dict__all_keys__deeper():
@@ -242,7 +290,7 @@ def test_settings_holder__import_function__does_not_exist():
 
     error = "Could not import 'bar' for setting 'FOO': bar doesn't look like a module path."
     with pytest.raises(ImportError, match=exact(error)):
-        x = holder.FOO
+        _x = holder.FOO
 
 
 def test_settings_holder__import_function__not_valid():
@@ -254,7 +302,7 @@ def test_settings_holder__import_function__not_valid():
 
     error = "'FOO' should be a string. Got 1."
     with pytest.raises(ValueError, match=exact(error)):
-        x = holder.FOO
+        _x = holder.FOO
 
 
 def test_settings_holder__import_function__not_valid__nested():
@@ -266,7 +314,7 @@ def test_settings_holder__import_function__not_valid__nested():
 
     error = "'FOO.BAR' should be a string. Got 1."
     with pytest.raises(ValueError, match=exact(error)):
-        x = holder.FOO
+        _x = holder.FOO
 
 
 def test_settings_holder__import_function__not_in_import_strings():
@@ -278,7 +326,7 @@ def test_settings_holder__import_function__not_in_import_strings():
 
     error = "'FOO' should be a mutable sequence or mapping. Got 1."
     with pytest.raises(ValueError, match=exact(error)):
-        x = holder.FOO
+        _x = holder.FOO
 
 
 def test_settings_holder__import_function__function_does_not_exist():
@@ -293,7 +341,7 @@ def test_settings_holder__import_function__function_does_not_exist():
         "Module 'tests.test_utils' does not define a 'xxx' attribute/class"
     )
     with pytest.raises(ImportError, match=exact(error)):
-        x = holder.FOO
+        _x = holder.FOO
 
 
 def test_settings_holder__import_function__module_does_not_exist():
@@ -305,7 +353,7 @@ def test_settings_holder__import_function__module_does_not_exist():
 
     error = "Could not import 'xxx.test_utils.function' for setting 'FOO': ModuleNotFoundError: No module named 'xxx'."
     with pytest.raises(ImportError, match=exact(error)):
-        x = holder.FOO
+        _x = holder.FOO
 
 
 def test_reload_settings(django_settings):
