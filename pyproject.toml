@@ -1,6 +1,6 @@
 [project]
 name = "django-settings-holder"
-version = "0.2.2"
+version = "0.3.0"
 description = "Object that allows settings to be accessed with attributes."
 authors = [
     { name = "Matti Lamppu", email = "lamppu.matti.akseli@gmail.com" },
