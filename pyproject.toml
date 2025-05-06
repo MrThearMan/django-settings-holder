@@ -58,7 +58,7 @@ tox-gh-actions = "3.3.0"
 
 [tool.poetry.group.docs.dependencies]
 mkdocs = "1.6.1"
-pymdown-extensions = "10.14.3"
+pymdown-extensions = "10.15"
 pygments = "2.19.1"
 mkdocs-mermaid2-plugin = "1.2.1"
 
