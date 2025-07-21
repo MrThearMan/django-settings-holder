@@ -35,7 +35,7 @@ from __future__ import annotations
 import sys
 from collections.abc import Callable, Mapping, Sequence
 from importlib import import_module
-from typing import Any, Optional, Union
+from typing import Any, Union
 
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
@@ -53,10 +53,10 @@ class SettingsHolder:
     def __init__(
         self,
         setting_name: str,
-        defaults: Optional[dict[str, Any]] = None,
-        import_strings: Optional[set[Union[str, bytes]]] = None,
-        removed_settings: Optional[dict[str, str | None]] = None,
-        validators: Optional[dict[str, Callable[[Any], None]]] = None,
+        defaults: dict[str, Any] | None = None,
+        import_strings: set[Union[str, bytes]] | None = None,
+        removed_settings: dict[str, str | None] | None = None,
+        validators: dict[str, Callable[[Any], None]] | None = None,
     ) -> None:
         """
         Object that allows settings to be accessed with attributes.
