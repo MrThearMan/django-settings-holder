@@ -45,11 +45,11 @@ class SettingsWrapper:
         self.__to_restore = []
 
     def __delattr__(self, attr: str) -> None:
-        from django.test import override_settings
+        from django.test import override_settings  # noqa: PLC0415
 
         override = override_settings()
         override.enable()
-        from django.conf import settings
+        from django.conf import settings  # noqa: PLC0415
 
         delattr(settings, attr)
 
@@ -60,7 +60,7 @@ class SettingsWrapper:
             self.__dict__[attr] = value
             return
 
-        from django.test import override_settings
+        from django.test import override_settings  # noqa: PLC0415
 
         override = override_settings(**{attr: value})
         override.enable()
@@ -70,7 +70,7 @@ class SettingsWrapper:
         if attr == "_SettingsWrapper__to_restore":
             return self.__dict__[attr]
 
-        from django.conf import settings
+        from django.conf import settings  # noqa: PLC0415
 
         return getattr(settings, attr)
 
