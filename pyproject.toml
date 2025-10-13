@@ -52,8 +52,8 @@ Django = ">=4.2"
 pytest = "8.4.2"
 pytest-django = "4.11.1"
 coverage = "7.10.7"
-tox = "4.30.3"
-tox-gh-actions = "3.3.0"
+tox = "4.31.0"
+tox-gh-actions = "3.4.0"
 
 [tool.poetry.group.docs.dependencies]
 mkdocs = "1.6.1"
