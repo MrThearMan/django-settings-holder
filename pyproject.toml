@@ -49,20 +49,20 @@ packages = [
 Django = ">=4.2"
 
 [tool.poetry.group.test.dependencies]
-pytest = "9.0.0"
+pytest = "9.0.1"
 pytest-django = "4.11.1"
-coverage = "7.11.3"
+coverage = "7.12.0"
 tox = "4.32.0"
 tox-gh-actions = "3.5.0"
 
 [tool.poetry.group.docs.dependencies]
 mkdocs = "1.6.1"
-pymdown-extensions = "10.16.1"
+pymdown-extensions = "10.17.1"
 pygments = "2.19.2"
 mkdocs-mermaid2-plugin = "1.2.3"
 
 [tool.poetry.group.lint.dependencies]
-pre-commit = "4.4.0"
+pre-commit = "4.5.0"
 
 [tool.ruff]
 fix = true
