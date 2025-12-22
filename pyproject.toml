@@ -62,7 +62,7 @@ pygments = "2.19.2"
 mkdocs-mermaid2-plugin = "1.2.3"
 
 [tool.poetry.group.lint.dependencies]
-pre-commit = "4.5.0"
+pre-commit = "4.5.1"
 
 [tool.ruff]
 fix = true
