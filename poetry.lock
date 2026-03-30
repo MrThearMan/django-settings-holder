@@ -729,14 +729,14 @@ virtualenv = ">=20.10.0"
 
 [[package]]
 name = "pygments"
-version = "2.19.2"
+version = "2.20.0"
 description = "Pygments is a syntax highlighting package written in Python."
 optional = false
-python-versions = ">=3.8"
+python-versions = ">=3.9"
 groups = ["docs", "test"]
 files = [
-    {file = "pygments-2.19.2-py3-none-any.whl", hash = "sha256:86540386c03d588bb81d44bc3928634ff26449851e99741617ecb9037ee5ec0b"},
-    {file = "pygments-2.19.2.tar.gz", hash = "sha256:636cb2477cec7f8952536970bc533bc43743542f70392ae026374600add5b887"},
+    {file = "pygments-2.20.0-py3-none-any.whl", hash = "sha256:81a9e26dd42fd28a23a2d169d86d7ac03b46e2f8b59ed4698fb4785f946d0176"},
+    {file = "pygments-2.20.0.tar.gz", hash = "sha256:6757cd03768053ff99f3039c1a36d6c0aa0b263438fcab17520b30a303a82b5f"},
 ]
 
 [package.extras]
@@ -744,14 +744,14 @@ windows-terminal = ["colorama (>=0.4.6)"]
 
 [[package]]
 name = "pymdown-extensions"
-version = "10.21"
+version = "10.21.2"
 description = "Extension pack for Python Markdown."
 optional = false
 python-versions = ">=3.9"
 groups = ["docs"]
 files = [
-    {file = "pymdown_extensions-10.21-py3-none-any.whl", hash = "sha256:91b879f9f864d49794c2d9534372b10150e6141096c3908a455e45ca72ad9d3f"},
-    {file = "pymdown_extensions-10.21.tar.gz", hash = "sha256:39f4a020f40773f6b2ff31d2cd2546c2c04d0a6498c31d9c688d2be07e1767d5"},
+    {file = "pymdown_extensions-10.21.2-py3-none-any.whl", hash = "sha256:5c0fd2a2bea14eb39af8ff284f1066d898ab2187d81b889b75d46d4348c01638"},
+    {file = "pymdown_extensions-10.21.2.tar.gz", hash = "sha256:c3f55a5b8a1d0edf6699e35dcbea71d978d34ff3fa79f3d807b8a5b3fa90fbdc"},
 ]
 
 [package.dependencies]
@@ -834,14 +834,14 @@ six = ">=1.5"
 
 [[package]]
 name = "python-discovery"
-version = "1.1.0"
+version = "1.2.1"
 description = "Python interpreter discovery"
 optional = false
 python-versions = ">=3.8"
 groups = ["lint", "test"]
 files = [
-    {file = "python_discovery-1.1.0-py3-none-any.whl", hash = "sha256:a162893b8809727f54594a99ad2179d2ede4bf953e12d4c7abc3cc9cdbd1437b"},
-    {file = "python_discovery-1.1.0.tar.gz", hash = "sha256:447941ba1aed8cc2ab7ee3cb91be5fc137c5bdbb05b7e6ea62fbdcb66e50b268"},
+    {file = "python_discovery-1.2.1-py3-none-any.whl", hash = "sha256:b6a957b24c1cd79252484d3566d1b49527581d46e789aaf43181005e56201502"},
+    {file = "python_discovery-1.2.1.tar.gz", hash = "sha256:180c4d114bff1c32462537eac5d6a332b768242b76b69c0259c7d14b1b680c9e"},
 ]
 
 [package.dependencies]
@@ -1027,14 +1027,14 @@ files = [
 
 [[package]]
 name = "tox"
-version = "4.50.3"
+version = "4.51.0"
 description = "tox is a generic virtualenv management and test command line tool"
 optional = false
 python-versions = ">=3.10"
 groups = ["test"]
 files = [
-    {file = "tox-4.50.3-py3-none-any.whl", hash = "sha256:5e788a512bfe6f7447e0c8d7c1b666eb2e56e5e676c65717490423bec37d1a07"},
-    {file = "tox-4.50.3.tar.gz", hash = "sha256:c745641de6cc4f19d066bd9f98c1c25f7affb005b381b7f3694a1f142ea0946b"},
+    {file = "tox-4.51.0-py3-none-any.whl", hash = "sha256:df848c4d9864ec6333c6e2b427fdc182b9f1d840d2bed072997bd48104269182"},
+    {file = "tox-4.51.0.tar.gz", hash = "sha256:e3967c0c2d7318d0b14a38d8cbb6ec2d12008574d612c1774fd00d376c7d5e6a"},
 ]
 
 [package.dependencies]
@@ -1045,6 +1045,7 @@ packaging = ">=26"
 platformdirs = ">=4.9.4"
 pluggy = ">=1.6"
 pyproject-api = ">=1.10"
+python-discovery = ">=1.2.1"
 tomli-w = ">=1.2"
 virtualenv = ">=21.1"
 
@@ -1176,4 +1177,4 @@ watchmedo = ["PyYAML (>=3.10)"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.11,<4"
-content-hash = "63df6a66107de56c59d8a865770f5f02b3e41681f667036e7d6cbbfedff61d34"
+content-hash = "3de83e453cda89169e2834f5763905fb5eb957bb36a525283ecca16258c3a33b"
