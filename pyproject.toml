@@ -48,13 +48,13 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-Django = ">=4.2"
+Django = ">=5.2.13"
 
 [tool.poetry.group.test.dependencies]
-pytest = "9.0.2"
+pytest = "9.0.3"
 pytest-django = "4.12.0"
 coverage = "7.13.5"
-tox = "4.52.0"
+tox = "4.52.1"
 tox-gh-actions = "3.5.0"
 
 [tool.poetry.group.docs.dependencies]
