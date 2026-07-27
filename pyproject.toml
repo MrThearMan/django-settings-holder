@@ -54,7 +54,7 @@ Django = ">=5.2.16"
 pytest = "9.1.1"
 pytest-django = "4.12.0"
 coverage = "7.15.2"
-tox = "4.57.0"
+tox = "4.58.0"
 tox-gh-actions = "3.5.0"
 
 [tool.poetry.group.docs.dependencies]
@@ -64,7 +64,7 @@ pygments = "2.20.0"
 mkdocs-mermaid2-plugin = "1.2.3"
 
 [tool.poetry.group.lint.dependencies]
-pre-commit = "4.6.0"
+pre-commit = "4.6.1"
 
 [tool.ruff]
 fix = true
