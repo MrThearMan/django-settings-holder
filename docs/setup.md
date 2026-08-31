@@ -97,7 +97,6 @@ use these settings instead of your defined defaults.
 MY_SETTINGS = {
     "foo": "baz",
 }
-
 ```
 
 ```python
