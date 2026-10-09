@@ -1,3 +1,7 @@
+---
+description: "How to contribute to Django Settings Holder."
+---
+
 # Contributing
 
 Thank you for your interest in contributing!

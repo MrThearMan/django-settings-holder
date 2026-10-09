@@ -1,3 +1,7 @@
+---
+description: "How to set up a settings holder for your library."
+---
+
 # Setup
 
 You'll need a place for your settings to live. I recommend a `settings.py` file in your library.

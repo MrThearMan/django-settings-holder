@@ -1,3 +1,7 @@
+---
+description: "Django Settings Holder: an object that allows settings to be accessed with attributes."
+---
+
 # Django Settings Holder
 
 [![Coverage Status][coverage-badge]][coverage]
