@@ -174,19 +174,20 @@ class SettingsHolder:
             return value
 
         if isinstance(value, Sequence):
-            return type(value)(self.make_imports(f"{name}.0", val) for val in value)
+            sequence_type: type[Any] = type(value)
+            return sequence_type(self.make_imports(f"{name}.0", val) for val in value)
 
         if isinstance(value, Mapping):
-            return type(value)((key, self.make_imports(f"{name}.{key}", val)) for key, val in value.items())
+            mapping_type: type[Any] = type(value)
+            return mapping_type((key, self.make_imports(f"{name}.{key}", val)) for key, val in value.items())
 
         msg = f"{name!r} should be a mutable sequence or mapping. Got {value!r}."
         raise ValueError(msg)
 
     def is_import_setting(self, attr: str) -> ImportSettingResults:
-        for value in self._imports:
-            is_immediate = isinstance(value, bytes)
-            if is_immediate:
-                value = value.decode("utf8")  # noqa: PLW2901
+        for import_string in self._imports:
+            is_immediate = isinstance(import_string, bytes)
+            value = import_string.decode("utf8") if isinstance(import_string, bytes) else import_string
 
             name = self.substitute_wildcards(attr, value)
 

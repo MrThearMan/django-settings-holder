@@ -10,6 +10,8 @@ from django.dispatch import Signal
 if TYPE_CHECKING:  # pragma: no cover
     from collections.abc import Callable
 
+    from django.test.utils import override_settings
+
     from .holder import SettingsHolder
 
 
@@ -42,7 +44,7 @@ class SettingsWrapper:
     """Object to enable changing settings during testing."""
 
     def __init__(self) -> None:
-        self.__to_restore = []
+        self.__to_restore: list[override_settings] = []
 
     def __delattr__(self, attr: str) -> None:
         from django.test import override_settings  # noqa: PLC0415
@@ -95,7 +97,7 @@ P = ParamSpec("P")
 def setup_settings_configured_signal() -> None:
     """Setup a signal that fires when settings are configured for the first time."""
     orig_conf = settings.configure
-    orig_setup = settings._setup
+    orig_setup = settings._setup  # type: ignore[misc]
 
     configured: bool = False
 
@@ -104,7 +106,7 @@ def setup_settings_configured_signal() -> None:
         def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
             nonlocal configured
 
-            func(*args, **kwargs)
+            result = func(*args, **kwargs)
 
             if not configured:
                 configured = True
@@ -116,6 +118,8 @@ def setup_settings_configured_signal() -> None:
                     signal_kwargs["accessed_setting"] = args[0]
 
                 settings_configured.send(None, **signal_kwargs)
+
+            return result
 
         return wrapper
 

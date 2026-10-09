@@ -10,7 +10,7 @@ SECRET_KEY = get_random_secret_key()
 ROOT_URLCONF = "example_project.project.urls"
 WSGI_APPLICATION = "example_project.project.wsgi.application"
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS: list[str] = []
 
 INSTALLED_APPS = [
     "django.contrib.admin",
