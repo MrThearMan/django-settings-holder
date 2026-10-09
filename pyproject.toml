@@ -94,23 +94,14 @@ django_settings_module = "example_project.project.settings"
 [tool.coverage.run]
 relative_files = true
 branch = true
-source = [
-    "settings_holder/",
+include = [
+    "settings_holder/*",
 ]
 
 [tool.coverage.report]
-omit = [
-    "example_project/*",
-    "tests/*",
-    "docs/*",
-    ".venv/*",
-    ".tox/*",
-]
+fail_under = 100
 exclude_also = [
-    "if TYPE_CHECKING:",
-    "except ImportError:",
-    "pragma: no cover",
-    "pass",
+    'if TYPE_CHECKING:',
 ]
 
 [tool.pytest.ini_options]

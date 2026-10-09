@@ -87,7 +87,7 @@ class SettingsHolder:
             self.check_user_settings()
 
     def __getattr__(self, attr: str) -> Any:
-        if not settings.configured:  # pragma: no cover
+        if not settings.configured:
             msg = "Settings are not configured."
             raise ImproperlyConfigured(msg)
 

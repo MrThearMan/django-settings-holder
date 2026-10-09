@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Any, ParamSpec, TypeVar
 from django.conf import settings
 from django.dispatch import Signal
 
-if TYPE_CHECKING:  # pragma: no cover
+if TYPE_CHECKING:
     from collections.abc import Callable
 
     from django.test.utils import override_settings

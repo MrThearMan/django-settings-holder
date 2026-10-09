@@ -1,9 +1,12 @@
 from unittest.mock import patch
 
 import pytest
+from django.conf import LazySettings, settings
 from django.core.exceptions import ImproperlyConfigured
+from django.dispatch import Signal
+from django.utils.functional import empty
 
-from settings_holder import SettingsHolder, SettingsWrapper, reload_settings
+from settings_holder import SettingsHolder, SettingsWrapper, reload_settings, utils
 from tests.helpers import exact
 
 
@@ -50,6 +53,16 @@ def test_settings_holder__setting_cached(django_settings):
 
     assert x == "bar"
     mock.assert_called_once()
+
+
+def test_settings_holder__settings_not_configured(monkeypatch):
+    monkeypatch.setattr(settings, "_wrapped", empty)
+
+    holder = SettingsHolder(setting_name="MOCK_SETTING", defaults={"FOO": "bar"})
+
+    msg = "Settings are not configured."
+    with pytest.raises(ImproperlyConfigured, match=exact(msg)):
+        _x = holder.FOO
 
 
 def test_settings_holder__setting_not_in_defaults(django_settings):
@@ -168,6 +181,16 @@ def test_settings_holder__import_function():
     )
 
     assert function == holder.FOO
+
+
+def test_settings_holder__import_function__other_setting():
+    holder = SettingsHolder(
+        setting_name="MOCK_SETTING",
+        defaults={"FOO": "tests.test_utils.function", "BAR": "tests.test_utils.function"},
+        import_strings={"BAR"},
+    )
+
+    assert holder.FOO == "tests.test_utils.function"
 
 
 def test_settings_holder__import_function__called_on_access():
@@ -440,3 +463,30 @@ def test_settings_wrapper__access_restore():
         assert wrapper.__getattr__("_SettingsWrapper__to_restore") == []
     finally:
         wrapper.finalize()
+
+
+def test_settings_configured_signal(monkeypatch):
+    lazy_settings = LazySettings()
+    signal = Signal()
+    monkeypatch.setattr(utils, "settings", lazy_settings)
+    monkeypatch.setattr(utils, "settings_configured", signal)
+
+    utils.setup_settings_configured_signal()
+
+    calls = []
+
+    def receiver(**kwargs):
+        calls.append(kwargs)
+
+    signal.connect(receiver)
+
+    # Configuring the settings clears the wrappers from the instance, so save one for later.
+    setup_wrapper = lazy_settings._setup
+
+    lazy_settings.configure(DEBUG=True)
+    assert len(calls) == 1
+    assert "accessed_setting" not in calls[0]
+
+    # Signal is only sent when settings are configured for the first time.
+    setup_wrapper("DEBUG")
+    assert len(calls) == 1
